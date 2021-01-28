@@ -1,0 +1,246 @@
+[
+  {
+    "ext": ".gzip",
+    "allowScanning": true
+  },
+  {
+    "ext": ".ico",
+    "allowScanning": true
+  },
+  {
+    "ext": ".bmp",
+    "allowScanning": true
+  },
+  {
+    "ext": ".webm",
+    "allowScanning": true
+  },
+  {
+    "ext": ".pl",
+    "allowScanning": true
+  },
+  {
+    "ext": ".tcl",
+    "allowScanning": true
+  },
+  {
+    "ext": ".7z",
+    "allowScanning": true
+  },
+  {
+    "ext": ".rar",
+    "allowScanning": true
+  },
+  {
+    "ext": ".jpg",
+    "allowScanning": true
+  },
+  {
+    "ext": ".hevc",
+    "allowScanning": true
+  },
+  {
+    "ext": ".html",
+    "allowScanning": true
+  },
+  {
+    "ext": ".vsd",
+    "allowScanning": true
+  },
+  {
+    "ext": ".xls",
+    "allowScanning": true
+  },
+  {
+    "ext": ".mov",
+    "allowScanning": true
+  },
+  {
+    "ext": ".mjpeg",
+    "allowScanning": true
+  },
+  {
+    "ext": ".xml",
+    "allowScanning": true
+  },
+  {
+    "ext": ".js",
+    "allowScanning": true
+  },
+  {
+    "ext": "tiff",
+    "allowScanning": true
+  },
+  {
+    "ext": ".mpg",
+    "allowScanning": true
+  },
+  {
+    "ext": ".wmv",
+    "allowScanning": true
+  },
+  {
+    "ext": ".f4v",
+    "allowScanning": true
+  },
+  {
+    "ext": ".mp3",
+    "allowScanning": true
+  },
+  {
+    "ext": ".txt",
+    "allowScanning": true
+  },
+  {
+    "ext": ".jpeg",
+    "allowScanning": true
+  },
+  {
+    "ext": ".flv",
+    "allowScanning": true
+  },
+  {
+    "ext": ".mpeg",
+    "allowScanning": true
+  },
+  {
+    "ext": ".wtv",
+    "allowScanning": true
+  },
+  {
+    "ext": ".mxf",
+    "allowScanning": true
+  },
+  {
+    "ext": ".py",
+    "allowScanning": true
+  },
+  {
+    "ext": ".doc",
+    "allowScanning": true
+  },
+  {
+    "ext": ".asf",
+    "allowScanning": true
+  },
+  {
+    "ext": ".3gp",
+    "allowScanning": true
+  },
+  {
+    "ext": ".rm",
+    "allowScanning": true
+  },
+  {
+    "ext": ".ts",
+    "allowScanning": true
+  },
+  {
+    "ext": ".png",
+    "allowScanning": true
+  },
+  {
+    "ext": ".mp4",
+    "allowScanning": true
+  },
+  {
+    "ext": ".m2ts",
+    "allowScanning": true
+  },
+  {
+    "ext": ".vsdx",
+    "allowScanning": true
+  },
+  {
+    "ext": ".tar",
+    "allowScanning": true
+  },
+  {
+    "ext": ".zip",
+    "allowScanning": true
+  },
+  {
+    "ext": ".json",
+    "allowScanning": true
+  },
+  {
+    "ext": ".tar.gz",
+    "allowScanning": true
+  },
+  {
+    "ext": ".vob",
+    "allowScanning": true
+  },
+  {
+    "ext": ".m2v",
+    "allowScanning": true
+  },
+  {
+    "ext": ".m4v",
+    "allowScanning": true
+  },
+  {
+    "ext": ".swf",
+    "allowScanning": true
+  },
+  {
+    "ext": ".php",
+    "allowScanning": true
+  },
+  {
+    "ext": ".xlsx",
+    "allowScanning": true
+  },
+  {
+    "ext": ".avi",
+    "allowScanning": true
+  },
+  {
+    "ext": ".pptx",
+    "allowScanning": true
+  },
+  {
+    "ext": ".gz",
+    "allowScanning": true
+  },
+  {
+    "ext": ".mts",
+    "allowScanning": true
+  },
+  {
+    "ext": ".lua",
+    "allowScanning": true
+  },
+  {
+    "ext": ".ppt",
+    "allowScanning": true
+  },
+  {
+    "ext": ".mkv",
+    "allowScanning": true
+  },
+  {
+    "ext": ".tar.xz",
+    "allowScanning": true
+  },
+  {
+    "ext": ".xz",
+    "allowScanning": true
+  },
+  {
+    "ext": ".ogv",
+    "allowScanning": true
+  },
+  {
+    "ext": ".docx",
+    "allowScanning": true
+  },
+  {
+    "ext": ".pdf",
+    "allowScanning": true
+  },
+  {
+    "ext": ".rtf",
+    "allowScanning": true
+  }
+]
