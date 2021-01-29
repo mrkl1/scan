@@ -3,6 +3,7 @@ package mainWindow
 import (
 	"github.com/myProj/scaner/new/include/appStruct"
 	"github.com/therecipe/qt/core"
+	"github.com/therecipe/qt/widgets"
 	"sync"
 	"time"
 )
@@ -72,9 +73,13 @@ func runUpdater(guiC *appStruct.GuiComponent) {
 			UpdateHelper.RunUpdate(func() {
 
 			})
+			//TODO нужно будет поменять
+			// и сделать отдельный канал
+			// но только после тестов под виндой
 		case  <-guiC.NonScanTableUpdate:
-			UpdateHelper.RunUpdate(func() {
 
+			UpdateHelper.RunUpdate(func() {
+				widgets.QMessageBox_Information(nil, "Ошибка доступа к директории","Невозможно получить доступ к директории", widgets.QMessageBox__Ok, widgets.QMessageBox__Ok)
 			})
 		default:
 

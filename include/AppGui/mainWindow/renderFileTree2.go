@@ -30,17 +30,30 @@ type treeNodeParametrs struct {
 
 func renderFileTree(guiC *appStruct.GuiComponent,btnStart *widgets.QPushButton,btnChooseDir *widgets.QPushButton,btnStop *widgets.QPushButton) {
 	defer func() { btnStop.SetEnabled(false) }()
-	defer func() { guiC.SearchIsActive = true }()
+
+	defer func() { guiC.SearchIsActive = true
+		btnStart.SetEnabled(true)
+		btnChooseDir.SetEnabled(true)
+	}()
+
+
 	startDir := guiC.StartDirectoryName
 	guiC.FileTree.Clear()
 	//RemoveAllRows(guiC.NonScanTable)
 	//RemoveAllRows(guiC.ErrorTable)
 
+	files, err := ioutil.ReadDir(guiC.StartDirectoryName)
+	if err != nil {
+		guiC.InfoAboutScanningFilesUpdate <- "Невозможно сканировать данную директорию, по причине ее отсутствия или невозможности доступа к ней"
+		guiC.NonScanTableUpdate <- ""
+		return
+	}
+
 	fileCount := computeFilesCount(startDir, guiC)
 	guiC.FileProgress.SetMinimum(0)
 	guiC.FileProgress.SetMaximum(fileCount)
 	count := 0
-	files, _ := ioutil.ReadDir(guiC.StartDirectoryName)
+
 
 	for _, file := range files {
 		if !guiC.SearchIsActive {
@@ -57,10 +70,7 @@ func renderFileTree(guiC *appStruct.GuiComponent,btnStart *widgets.QPushButton,b
 	guiC.FileProgressUpdate <- count
 
 	guiC.InfoAboutScanningFilesUpdate <- "Сканирование завершено"
-	guiC.SearchIsActive = false
 
-	btnStart.SetEnabled(true)
-	btnChooseDir.SetEnabled(true)
 }
 
 func scanDirTree(guiC *appStruct.GuiComponent,count *int,file os.FileInfo){
