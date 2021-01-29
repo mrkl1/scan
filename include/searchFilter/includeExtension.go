@@ -2,6 +2,7 @@ package searchFilter
 
 import (
 	"github.com/myProj/scaner/new/include/config/extensions"
+	"strings"
 )
 
 //возможно тут стоит использовать бинарный поиск
@@ -44,6 +45,15 @@ func IsUnsupported(extension string)bool{
 }
 
 
+
+func IsContainArchiveExtension(file string)bool{
+	for _,ext := range extensions.Archives {
+		if strings.HasSuffix(file,ext){
+			return true
+		}
+	}
+	return false
+}
 
 
 

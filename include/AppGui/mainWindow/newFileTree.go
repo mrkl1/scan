@@ -1,11 +1,15 @@
 package mainWindow
 
 import (
+	"fmt"
 	"github.com/myProj/scaner/new/include/appStruct"
+	"github.com/myProj/scaner/new/include/searchFilter"
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/widgets"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 )
 
 const (
@@ -32,65 +36,93 @@ func newFileTree(guiC *appStruct.GuiComponent)*widgets.QTreeWidget{
 	})
 
 	//cont menu
-	ContextMenu := widgets.NewQMenu(fileTree)
+	ContextMenu := widgets.NewQMenu(nil)
 	menuOpenFile := ContextMenu.AddAction("Открыть файл")
 	menuOpenDir := ContextMenu.AddAction("Открыть директорию файла")
 	menuOpenBranch := ContextMenu.AddAction("Раскрыть ветку")
-	fileTree.SetContextMenuPolicy(core.Qt__CustomContextMenu)
-	fileTree.ConnectCustomContextMenuRequested(func(pos *core.QPoint){
+	guiC.MainWindow.SetContextMenuPolicy(core.Qt__CustomContextMenu)
 
-		menuOpenFile.ConnectTriggered(func(checked bool) {
-			si := fileTree.SelectedItems()
-			if si != nil && len(si)>0 && si[0].Text(0) != ""  {
 
-				copySi := si[0]
-				path := ""
-				for copySi != nil {
-					path = copySi.Text(0)+"/"+path
-					copySi = copySi.Parent()
-				}
 
-				path = filepath.Clean(guiC.StartDirectoryName+path)
-				//TODO сделать настройку для для архивов
-				//     3 колонка определяется расширение
+	guiC.MainWindow.ConnectCustomContextMenuRequested(func(pos *core.QPoint){
+
+		ContextMenu.Exec2(guiC.MainWindow.MapToGlobal(pos), nil)
+
+	})
+
+
+	menuOpenFile.ConnectTriggered(func(checked bool) {
+
+
+
+		si := fileTree.SelectedItems()
+		if si != nil && len(si)>0 && si[0].Text(0) != ""  {
+
+			copySi := si[0]
+			path := ""
+			for copySi != nil {
+				path =  filepath.Join(copySi.Text(0),path)
+				copySi = copySi.Parent()
+			}
+
+			path = filepath.Clean(filepath.Join( guiC.StartDirectoryName,path))
+			archPath := checkForArchive(path)
+			if  archPath != ""{
+				archPath,_ := filepath.Abs(archPath)
+				path = archPath
+			}
+
+			//TODO чтобы возможно было открыть с подсветкой файла
+			// в директории нужно использовать местные файловые менеджеры
+			// linux nautilus
+			// windows explorer
+
+
+			//"nautilus","/media/us/Transcend/тестовые_данные_для _программ/dict.txt"
+			cmd := exec.Command("nautilus",archPath)
+			fmt.Println(archPath)
+			err := cmd.Run()
+			if err != nil {
 				info := core.NewQFileInfo3(path)
-				url := core.QUrl_FromLocalFile(info.AbsoluteFilePath())
-				gui.QDesktopServices_OpenUrl(url)
-
-			}
-
-		})
-
-		menuOpenDir.ConnectTriggered(func(checked bool) {
-			si := fileTree.SelectedItems()
-			if si != nil && len(si)>0 && si[0].Text(0) != ""  {
-
-				copySi := si[0]
-				path := ""
-				for copySi != nil {
-					path = copySi.Text(0)+"/"+path
-					copySi = copySi.Parent()
-				}
-
-				path = filepath.Clean(guiC.StartDirectoryName+path)
-
-				info := core.NewQFileInfo3(filepath.Dir(path))
-				url := core.QUrl_FromLocalFile(info.AbsoluteFilePath())
+				url := core.QUrl_FromLocalFile(info.AbsolutePath())
 				gui.QDesktopServices_OpenUrl(url)
 			}
+			//explorer.exe /select,"C:\Folder\subfolder\file.txt"
 
-		})
 
-		menuOpenBranch.ConnectTriggered(func(checked bool) {
-			si := fileTree.SelectedItems()
-			if si != nil && len(si)>0 && si[0].Text(0) != ""  {
 
-				expand(si[0])
+		}
+
+
+	})
+
+	menuOpenDir.ConnectTriggered(func(checked bool) {
+		si := fileTree.SelectedItems()
+		if si != nil && len(si)>0 && si[0].Text(0) != ""  {
+
+			copySi := si[0]
+			path := ""
+			for copySi != nil {
+				path =  filepath.Join(copySi.Text(0),path)
+				copySi = copySi.Parent()
 			}
 
-		})
+			path = filepath.Clean(guiC.StartDirectoryName+path)
 
-		ContextMenu.Exec2(fileTree.MapToGlobal(pos), nil)
+			info := core.NewQFileInfo3(filepath.Dir(path))
+			url := core.QUrl_FromLocalFile(info.AbsolutePath())
+			gui.QDesktopServices_OpenUrl(url)
+		}
+
+	})
+
+	menuOpenBranch.ConnectTriggered(func(checked bool) {
+		si := fileTree.SelectedItems()
+		if si != nil && len(si)>0 && si[0].Text(0) != ""  {
+
+			expand(si[0])
+		}
+
 	})
 
 
@@ -112,6 +144,25 @@ func expand(ptr *widgets.QTreeWidgetItem){
 	}
 }
 
+
+func checkForArchive(path string)string{
+
+	spldr :=splitDir(path)
+
+	for i,d := range spldr{
+		if searchFilter.IsContainArchiveExtension(d){
+			spldr = spldr[:i+1]
+
+			newPath := filepath.Join(spldr[:]...)
+
+			if runtime.GOOS == "linux" {
+				newPath = string(filepath.Separator)+newPath
+			}
+			return newPath
+		}
+	}
+	return ""
+}
 
 
 
