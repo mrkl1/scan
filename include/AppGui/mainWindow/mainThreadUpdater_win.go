@@ -1,9 +1,10 @@
+//+build windows
+
 package mainWindow
 
 import (
 	"github.com/myProj/scaner/new/include/appStruct"
 	"github.com/therecipe/qt/core"
-	"github.com/therecipe/qt/widgets"
 	"sync"
 	"time"
 )
@@ -24,8 +25,6 @@ var UpdateHelper = NewUpdateHelper(nil)
 при таком подходе обновление компонентов происходит в главном потоке
 если обновление компонентов производить не в главном потоке то
 можно словить SIGSEGV: и приложение закрашится
-
-
  */
 func runUpdater(guiC *appStruct.GuiComponent) {
 	//TODO
@@ -36,51 +35,52 @@ func runUpdater(guiC *appStruct.GuiComponent) {
 	for {
 		select {
 		case  count := <-guiC.FileProgressUpdate:
-			UpdateHelper.RunUpdate(func() {
-				mu.Lock()
-				guiC.FileProgress.SetValue(count)
-				defer mu.Unlock()
-			})
+
+			mu.Lock()
+			guiC.FileProgress.SetValue(count)
+			mu.Unlock()
+			//WARNING проблема с этой функцией
+			//UpdateHelper.RunUpdate(func() {
+			//
+			//})
 		case count := <-guiC.InfoAboutScanningFilesUpdate:
-			UpdateHelper.RunUpdate(func() {
-				mu.Lock()
-				defer mu.Unlock()
-				guiC.InfoAboutScanningFiles.SetText(count)
-				guiC.InfoAboutScanningFiles.AdjustSize()
 
-			})
+			mu.Lock()
+			guiC.InfoAboutScanningFiles.SetText(count)
+			guiC.InfoAboutScanningFiles.AdjustSize()
+			mu.Unlock()
+			//UpdateHelper.RunUpdate(func() {
+			//
+			//})
 		case timeStr := <-guiC.ScanningTimeInfoUpdate:
-			UpdateHelper.RunUpdate(func() {
-				mu.Lock()
-				defer mu.Unlock()
-				guiC.ScanningTimeInfo.SetText(timeStr)
-				guiC.ScanningTimeInfo.AdjustSize()
+			mu.Lock()
+			guiC.ScanningTimeInfo.SetText(timeStr)
+			guiC.ScanningTimeInfo.AdjustSize()
+			mu.Unlock()
 
-			})
+			//UpdateHelper.RunUpdate(func() {
+			//})
+
 		case updName := <-guiC.InfoAboutScanningFilesUpdate:
-			UpdateHelper.RunUpdate(func() {
-				mu.Lock()
-				defer mu.Unlock()
-				guiC.InfoAboutScanningFiles.SetText(updName)
-				guiC.InfoAboutScanningFiles.AdjustSize()
+			mu.Lock()
+			guiC.InfoAboutScanningFiles.SetText(updName)
+			guiC.InfoAboutScanningFiles.AdjustSize()
+			mu.Unlock()
 
-			})
-		case  <-guiC.FileTreeUpdate:
-			UpdateHelper.RunUpdate(func() {
-
-			})
-		case  <-guiC.ErrorTableUpdate:
-			UpdateHelper.RunUpdate(func() {
-
-			})
-			//TODO нужно будет поменять
-			// и сделать отдельный канал
-			// но только после тестов под виндой
-		case  <-guiC.NonScanTableUpdate:
-
-			UpdateHelper.RunUpdate(func() {
-				widgets.QMessageBox_Information(nil, "Ошибка доступа к директории","Невозможно получить доступ к директории", widgets.QMessageBox__Ok, widgets.QMessageBox__Ok)
-			})
+			//UpdateHelper.RunUpdate(func() {
+			//})
+		//case  <-guiC.FileTreeUpdate:
+		//	UpdateHelper.RunUpdate(func() {
+		//
+		//	})
+		//case  <-guiC.ErrorTableUpdate:
+		//	UpdateHelper.RunUpdate(func() {
+		//
+		//	})
+		//case  <-guiC.NonScanTableUpdate:
+		//	UpdateHelper.RunUpdate(func() {
+		//
+		//	})
 		default:
 
 			// TODO  попробовать сделать с qt timers

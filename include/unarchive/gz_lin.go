@@ -1,3 +1,5 @@
+//+build linux
+
 package unarchive
 
 import (
@@ -22,6 +24,7 @@ TODO 3.01.2021 тут есть явная проблема
  будет завершать все эти команды, при завершении работы
  основной функции разархивации
 
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
  */
 
 func unpackGZ(path,dest string)error{
