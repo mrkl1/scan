@@ -6,10 +6,9 @@ import (
 	"github.com/mholt/archiver"
 	"github.com/myProj/scaner/new/include/appStruct"
 	"github.com/myProj/scaner/new/include/config/newWordsConfig"
+	"github.com/myProj/scaner/new/include/tempDeleter"
 	"github.com/myProj/scaner/new/include/textSearchAndExtract"
 	"io/ioutil"
-	"log"
-	"os"
 	"path/filepath"
 	"sync"
 
@@ -138,23 +137,13 @@ func UnpackWithCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent)([]Fr
 		cancel <- false
 		skip <- false
 		stopTimer <- false
-		//
-		//
-		//
-		//wg.Wait()
-		//close(end)
-		//close(endInfo)
-		//close(cancel)
-		//close(skip)
-		//close(stopTimer)
-		//close(fichan)
-		//close(fechan)
 
 
-		err := os.RemoveAll(filepath.Join(filepath.Dir(path), "temp_Path"))
-		if err != nil {
-			log.Println("DEFER",err)
-		}
+
+		//err := os.RemoveAll(filepath.Join(filepath.Dir(path), "temp_Path"))
+		//if err != nil {
+		//	log.Println("DEFER",err)
+		//}
 	}()
 	select {
 		case <-cancel:
@@ -223,23 +212,19 @@ func unpackCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent,
 	var err error
 	path = CheckExtension(path,ext)
 
-	tempPath := filepath.Join(filepath.Dir(path), "temp_Path")
-	defer func() {
-		err := os.RemoveAll(tempPath)
+	tempPath,err := tempDeleter.CreateTempDir("")
+	guiC.AddTempDir <- tempPath
 
-		if err != nil {
-			time.Sleep(1*time.Second)
-			err := os.RemoveAll(tempPath)
-			log.Println("DEFER",err)
-		}
+	//tempPath := filepath.Join(filepath.Dir(path), "temp_Path")
+
+	defer func() {
+		guiC.DeleteTempDir <-tempPath
 	}()
 
 	if beautyName == ""{
-		beautyName = filepath.Join(filepath.Dir(path), filepath.Base(path))
+		beautyName = path
 	}
-	if ext == ".7z"{
-		err = Unpack7z(path,tempPath)
-	}else if ext == ".gz"{
+	if ext == ".7z" || ext == ".gz"{
 		err = unpackGZ(path,tempPath)
 	} else {
 
@@ -300,7 +285,6 @@ func findAnotherArhcWithCtx(path,ext,beautyName string,guiC *appStruct.GuiCompon
 				fe <- ae
 			}
 			if isArch(ext){
-
 				beautyName := filepath.Join(beautyName, f.Name())
 				unpackCtx(filepath.Join(path,f.Name()),ext,beautyName,guiC,fi,fe,end)
 				continue
