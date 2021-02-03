@@ -34,6 +34,7 @@ func renderFileTree(guiC *appStruct.GuiComponent,btnStart *widgets.QPushButton,b
 	defer func() { guiC.SearchIsActive = true
 		btnStart.SetEnabled(true)
 		btnChooseDir.SetEnabled(true)
+		guiC.EndDeleteTemp <- true
 	}()
 
 
@@ -99,7 +100,6 @@ func scanDirTree(guiC *appStruct.GuiComponent,count *int,file os.FileInfo){
 			guiC.FileProgressUpdate <- *count
 
 
-			fmt.Println(ext,path)
 			if searchFilter.IsExtensionForSearch(ext) {
 
 				if searchFilter.IsMedia(ext){
@@ -165,7 +165,7 @@ func scanFileTree(guiC *appStruct.GuiComponent,count *int,file os.FileInfo){
 	guiC.FileProgressUpdate <- *count
 	//guiC.FileProgress.SetValue(*count)
 
-	fmt.Println(ext,startFilePath)
+
 	if ext == "" {
 		addErrorsToTable(guiC.ErrorTable,
 			unarchive.ArchInfoError{

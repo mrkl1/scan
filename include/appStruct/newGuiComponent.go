@@ -40,6 +40,11 @@ type GuiComponent struct{
 	SearchIsActive         bool
 	SkipItem               bool
 	StartDirectoryName     string
+
+
+	AddTempDir             chan string
+	DeleteTempDir          chan string
+	EndDeleteTemp          chan bool
 }
 
 func NewGui()*GuiComponent{
@@ -49,20 +54,23 @@ func NewGui()*GuiComponent{
 		MainWindow:                   nil,
 		MainWidget:                   nil,
 		FileProgress:                 nil,
-		FileProgressUpdate:           make(chan int,1000),
+		FileProgressUpdate:           make(chan int, 1000),
 		InfoAboutScanningFiles:       nil,
-		InfoAboutScanningFilesUpdate: make(chan string,1000),
+		InfoAboutScanningFilesUpdate: make(chan string, 1000),
 		StartDirectoryForScan:        nil,
 		ScanningTimeInfo:             nil,
-		ScanningTimeInfoUpdate:       make(chan string,1000),
+		ScanningTimeInfoUpdate:       make(chan string, 1000),
 		FileTree:                     nil,
-		FileTreeUpdate:               make(chan TreeItemsPair,1000),
+		FileTreeUpdate:               make(chan TreeItemsPair, 1000),
 		ErrorTable:                   nil,
-		ErrorTableUpdate:             make(chan string,1000),
+		ErrorTableUpdate:             make(chan string, 1000),
 		NonScanTable:                 nil,
-		NonScanTableUpdate:           make(chan string,1000),
+		NonScanTableUpdate:           make(chan string, 1000),
 		SearchIsActive:               false,
 		SkipItem:                     false,
 		StartDirectoryName:           "",
+		AddTempDir:                   make(chan string, 1000),
+		DeleteTempDir:                make(chan string, 1000),
+		EndDeleteTemp:                make(chan bool, 1000),
 	}
 }

@@ -2,6 +2,9 @@ package mainWindow
 
 import (
 	"github.com/myProj/scaner/new/include/appStruct"
+	"github.com/myProj/scaner/new/include/config"
+	"github.com/myProj/scaner/new/include/logggerScan"
+	"github.com/myProj/scaner/new/include/tempDeleter"
 	"github.com/therecipe/qt/widgets"
 	"strings"
 	"time"
@@ -41,7 +44,7 @@ func controlButtonsArea(guiC *appStruct.GuiComponent)*widgets.QVBoxLayout{
 		btnChooseDir.SetEnabled(false)
 		btnStop.SetEnabled(true)
 		//mb тут сделать select по остановке функции
-
+		go tempDeleter.StartDelete(guiC)
 		go renderFileTree(guiC,btnStart,btnChooseDir,btnStop)
 
 	})
@@ -58,6 +61,19 @@ func controlButtonsArea(guiC *appStruct.GuiComponent)*widgets.QVBoxLayout{
 		guiC.StartDirectoryForScan.SetText(directoryForScanning+": "+filePath)
 		guiC.InfoAboutScanningFiles.SetText("")
 		guiC.StartDirectoryName = filePath
+		cfg := config.GetCurrentConfig()
+		cfg.StartCoordinate =[]int{
+			guiC.MainWindow.Geometry().X(),
+			guiC.MainWindow.Geometry().Y(),
+			guiC.MainWindow.Width(),
+			guiC.MainWindow.Height(),
+		}
+		cfg.StartDir = guiC.StartDirectoryName
+
+		err := config.SaveCurrentConfig(cfg)
+		if err != nil {
+			logggerScan.SaveToLog("SaveCurrentConfig error:"+err.Error())
+		}
 	})
 
 	btnStop.ConnectClicked(func(checked bool) {
