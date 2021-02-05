@@ -57,6 +57,7 @@ func renderFileTree(guiC *appStruct.GuiComponent,btnStart ,btnChooseDir ,btnStop
 	guiC.FileProgress.SetMinimum(0)
 	guiC.FileProgress.SetMaximum(fileCount)
 	count := 0
+	guiC.FileProgress.ValueChangedFromGoroutine(count)
 
 
 	for _, file := range files {
@@ -90,7 +91,8 @@ func scanDirTree(guiC *appStruct.GuiComponent,count *int,file os.FileInfo){
 			ext := detectFileExtension(path)
 			guiC.InfoAboutScanningFiles.UpdateTextFromGoroutine("Сканируется "+path)
 
-			if ext == ""{
+			if ext == "" && !info.IsDir(){
+
 				addErrorsToTable(guiC.ErrorTable,
 					unarchive.ArchInfoError{
 						ArchiveName: path,
