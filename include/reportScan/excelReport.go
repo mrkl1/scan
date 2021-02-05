@@ -39,9 +39,12 @@ func SaveReport(guiC *appStruct.GuiComponent){
 	createFindFileList(f,guiC)
 	createErrorList(f,guiC)
 	createMediaList(f,guiC)
-	filename := widgets.QFileDialog_GetOpenFileName(nil,"Open File","","","",widgets.QFileDialog__DontUseNativeDialog)
-
-	f.SaveAs(filename)
+	var fileDialog = widgets.NewQFileDialog2(nil,"Save as...",
+		"","")
+	fileDialog.SetMimeTypeFilters([]string{"*.xlsx",})
+	newPAth := fileDialog.GetSaveFileName(nil,"Save as...",
+		"","Files (*.xlsx)","",0)
+	f.SaveAs(newPAth)
 }
 
 func setFirstRowHeight(f *excelize.File,h float64){
