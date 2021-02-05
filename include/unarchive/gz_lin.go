@@ -9,7 +9,6 @@ import (
 	"github.com/myProj/scaner/new/include/logggerScan"
 	"log"
 	"os/exec"
-	"runtime"
 )
 
 //https://stackoverflow.com/questions/11886531/terminating-a-process-started-with-os-exec-in-golang
@@ -29,18 +28,14 @@ TODO 3.01.2021 тут есть явная проблема
  */
 
 
+
 func unpackGZ(path,dest string, ctx context.Context)error{
 
 	var cmd *exec.Cmd
 	//заменить на функцию, которая компилируется в зависимости от ОС
 
-	if runtime.GOOS == "windows"{
-		cmd = exec.CommandContext(ctx,pass7zWindows,"e",path,"-o"+dest)
-	} else if runtime.GOOS == "linux"{
-		cmd = exec.CommandContext(ctx,pass7zLinux,"e",path,"-o"+dest)
-	} else {
-		return errors.New("Не поддерживается для данной ОС")
-	}
+		cmd = getCommandContext(ctx,path,dest)
+
 
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
