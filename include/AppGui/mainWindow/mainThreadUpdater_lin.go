@@ -6,7 +6,6 @@ import (
 	"github.com/myProj/scaner/new/include/appStruct"
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
-	"sync"
 	"time"
 )
 
@@ -34,50 +33,8 @@ func runUpdater(guiC *appStruct.GuiComponent) {
 	// возможно стоит сделать индикатор который показывает число просканированных
 	// файлов из всех
 	// пакеты с тегом для деплоя и с тегом для тестирования
-	var mu sync.Mutex
-	for {
+		for {
 		select {
-		case  count := <-guiC.FileProgressUpdate:
-			UpdateHelper.RunUpdate(func() {
-				mu.Lock()
-				guiC.FileProgress.SetValue(count)
-				defer mu.Unlock()
-			})
-		case count := <-guiC.InfoAboutScanningFilesUpdate:
-			UpdateHelper.RunUpdate(func() {
-				mu.Lock()
-				defer mu.Unlock()
-				guiC.InfoAboutScanningFiles.SetText(count)
-				guiC.InfoAboutScanningFiles.AdjustSize()
-
-			})
-		case timeStr := <-guiC.ScanningTimeInfoUpdate:
-			UpdateHelper.RunUpdate(func() {
-				mu.Lock()
-				defer mu.Unlock()
-				guiC.ScanningTimeInfo.SetText(timeStr)
-				guiC.ScanningTimeInfo.AdjustSize()
-
-			})
-		case updName := <-guiC.InfoAboutScanningFilesUpdate:
-			UpdateHelper.RunUpdate(func() {
-				mu.Lock()
-				defer mu.Unlock()
-				guiC.InfoAboutScanningFiles.SetText(updName)
-				guiC.InfoAboutScanningFiles.AdjustSize()
-
-			})
-		case  <-guiC.FileTreeUpdate:
-			UpdateHelper.RunUpdate(func() {
-
-			})
-		case  <-guiC.ErrorTableUpdate:
-			UpdateHelper.RunUpdate(func() {
-
-			})
-			//TODO нужно будет поменять
-			// и сделать отдельный канал
-			// но только после тестов под виндой
 		case  <-guiC.NonScanTableUpdate:
 
 			UpdateHelper.RunUpdate(func() {

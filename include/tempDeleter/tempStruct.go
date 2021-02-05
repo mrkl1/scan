@@ -1,7 +1,6 @@
 package tempDeleter
 
 import (
-	"log"
 	"os"
 )
 
@@ -63,10 +62,10 @@ func removeAllDirs(fd []folderDeleter)[]folderDeleter{
 	for i := 0; i < len(fd); i++ {
 		err := os.RemoveAll(fd[i].tempName)
 		if err != nil {
-			log.Println("err rem all::",err)
+			//log.Println("err rem all::",err)
 			continue
 		}
-		log.Println("rem all::",fd[i].tempName)
+		//log.Println("rem all::",fd[i].tempName)
 		fd = removeFolder(fd[i].tempName,fd)
 	}
 	return fd

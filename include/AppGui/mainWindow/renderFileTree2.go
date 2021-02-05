@@ -28,12 +28,15 @@ type treeNodeParametrs struct {
 	ext        string
 }
 
-func renderFileTree(guiC *appStruct.GuiComponent,btnStart *widgets.QPushButton,btnChooseDir *widgets.QPushButton,btnStop *widgets.QPushButton) {
-	defer func() { btnStop.SetEnabled(false) }()
+func renderFileTree(guiC *appStruct.GuiComponent,btnStart ,btnChooseDir ,btnStop *appStruct.CustomButton) {
+
+	defer func() { btnStop.SetEnabledFromGoroutine(false)
+		btnStart.SetEnabledFromGoroutine(true)
+		btnChooseDir.SetEnabledFromGoroutine(true)
+	}()
 
 	defer func() { guiC.SearchIsActive = true
-		btnStart.SetEnabled(true)
-		btnChooseDir.SetEnabled(true)
+
 		guiC.EndDeleteTemp <- true
 	}()
 
@@ -45,7 +48,7 @@ func renderFileTree(guiC *appStruct.GuiComponent,btnStart *widgets.QPushButton,b
 
 	files, err := ioutil.ReadDir(guiC.StartDirectoryName)
 	if err != nil {
-		guiC.InfoAboutScanningFilesUpdate <- "Невозможно сканировать данную директорию, по причине ее отсутствия или невозможности доступа к ней"
+		guiC.InfoAboutScanningFiles.UpdateTextFromGoroutine("Невозможно сканировать данную директорию, по причине ее отсутствия или невозможности доступа к ней")
 		guiC.NonScanTableUpdate <- ""
 		return
 	}
@@ -70,7 +73,7 @@ func renderFileTree(guiC *appStruct.GuiComponent,btnStart *widgets.QPushButton,b
 	}
 	guiC.FileProgressUpdate <- count
 
-	guiC.InfoAboutScanningFilesUpdate <- "Сканирование завершено"
+	guiC.InfoAboutScanningFiles.UpdateTextFromGoroutine("Сканирование завершено")
 
 }
 
@@ -85,7 +88,7 @@ func scanDirTree(guiC *appStruct.GuiComponent,count *int,file os.FileInfo){
 			}
 
 			ext := detectFileExtension(path)
-			guiC.InfoAboutScanningFilesUpdate <- "Сканируется "+path
+			guiC.InfoAboutScanningFiles.UpdateTextFromGoroutine("Сканируется "+path)
 
 			if ext == ""{
 				addErrorsToTable(guiC.ErrorTable,
@@ -95,10 +98,6 @@ func scanDirTree(guiC *appStruct.GuiComponent,count *int,file os.FileInfo){
 
 					},ext)
 			}
-
-			*count++
-			guiC.FileProgressUpdate <- *count
-
 
 			if searchFilter.IsExtensionForSearch(ext) {
 
@@ -147,7 +146,8 @@ func scanDirTree(guiC *appStruct.GuiComponent,count *int,file os.FileInfo){
 					addChild2(head,newChildNode(stat,relPath,ext))
 				}
 			}// конец if проверяющего файлы с подходящим расширением
-
+			*count++
+			guiC.FileProgress.ValueChangedFromGoroutine(*count)
 			return nil
 		})
 
@@ -160,10 +160,8 @@ func scanFileTree(guiC *appStruct.GuiComponent,count *int,file os.FileInfo){
 	startFilePath := filepath.Join(guiC.StartDirectoryName, file.Name())
 	var head *widgets.QTreeWidgetItem
 	ext := detectFileExtension(startFilePath)
-	guiC.InfoAboutScanningFilesUpdate <- "Сканируется "+startFilePath+" "
-	*count++
-	guiC.FileProgressUpdate <- *count
-	//guiC.FileProgress.SetValue(*count)
+	guiC.InfoAboutScanningFiles.UpdateTextFromGoroutine( "Сканируется "+startFilePath+" ")
+
 
 
 	if ext == "" {
@@ -212,7 +210,7 @@ func scanFileTree(guiC *appStruct.GuiComponent,count *int,file os.FileInfo){
 				}
 			}
 
-			return
+
 		}//isArchive end
 		w := textSearchAndExtract.FindText(startFilePath,ext,newWordsConfig.GetDictWords())
 		stat,containsWord := checkResultFor(w)
@@ -223,6 +221,8 @@ func scanFileTree(guiC *appStruct.GuiComponent,count *int,file os.FileInfo){
 			head.SetBackground(0,g)
 		}
 	}
+	*count++
+	guiC.FileProgress.ValueChangedFromGoroutine(*count)
 
 }
 
@@ -252,7 +252,7 @@ func computeFilesCount(startDir string,guiC *appStruct.GuiComponent)int  {
 				//без sleep крашится
 				//через 3-4 прогона
 				time.Sleep(300*time.Millisecond)
-				guiC.InfoAboutScanningFilesUpdate <- "Идет подсчет файлов и папок. На текущий момент обнаружено: "+strconv.Itoa(count)
+				guiC.InfoAboutScanningFiles.UpdateTextFromGoroutine("Идет подсчет файлов и папок. На текущий момент обнаружено: "+strconv.Itoa(count))
 			}
 		}
 	}()
@@ -290,7 +290,7 @@ func computeFilesCount(startDir string,guiC *appStruct.GuiComponent)int  {
 
 	stopGorun <- true
 	stopGorunSearch <- true
-	guiC.InfoAboutScanningFilesUpdate <- "Общее число файлов папок для сканирования: "+strconv.Itoa(count)
+	guiC.InfoAboutScanningFiles.UpdateTextFromGoroutine("Общее число файлов папок для сканирования: "+strconv.Itoa(count))
 	wg.Wait()
 	return count
 }

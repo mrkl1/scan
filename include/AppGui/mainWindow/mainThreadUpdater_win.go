@@ -46,16 +46,16 @@ func runUpdater(guiC *appStruct.GuiComponent) {
 		case count := <-guiC.InfoAboutScanningFilesUpdate:
 
 			mu.Lock()
-			guiC.InfoAboutScanningFiles.SetText(count)
-			guiC.InfoAboutScanningFiles.AdjustSize()
+			guiC.InfoAboutScanningFiles.UpdateTextFromGoroutine(count)
+			guiC.InfoAboutScanningFiles.AdjustSizeFromGoroutine()
 			mu.Unlock()
 			//UpdateHelper.RunUpdate(func() {
 			//
 			//})
 		case timeStr := <-guiC.ScanningTimeInfoUpdate:
 			mu.Lock()
-			guiC.ScanningTimeInfo.SetText(timeStr)
-			guiC.ScanningTimeInfo.AdjustSize()
+			guiC.ScanningTimeInfo.UpdateTextFromGoroutine(timeStr)
+			guiC.ScanningTimeInfo.AdjustSizeFromGoroutine()
 			mu.Unlock()
 
 			//UpdateHelper.RunUpdate(func() {
@@ -63,8 +63,8 @@ func runUpdater(guiC *appStruct.GuiComponent) {
 
 		case updName := <-guiC.InfoAboutScanningFilesUpdate:
 			mu.Lock()
-			guiC.InfoAboutScanningFiles.SetText(updName)
-			guiC.InfoAboutScanningFiles.AdjustSize()
+			guiC.InfoAboutScanningFiles.UpdateTextFromGoroutine(updName)
+			guiC.InfoAboutScanningFiles.AdjustSizeFromGoroutine()
 			mu.Unlock()
 
 			//UpdateHelper.RunUpdate(func() {

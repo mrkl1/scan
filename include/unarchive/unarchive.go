@@ -20,12 +20,10 @@ var wg sync.WaitGroup
 
 type chanCLosers struct {
 	cancel chan bool
-	//stop   chan bool
-	//ctx    chan bool
 	skip   chan bool
 }
 
-func NewChanCLosers()chanCLosers{
+func newChanCLosers()chanCLosers{
 	return chanCLosers{
 		cancel: make(chan bool,1),
 		//stop:   make(chan bool,1),
@@ -67,17 +65,7 @@ func isArch(ext string)bool{
 	return false
 }
 
-//функция часть более большой функции для
-//общего сканирования файлов
-//если архив переименован и не содержит
-//своего расширения то его надо добавить
-//ext для определеения настоящего расширения
-//изначально beautyName должно быть пустым
 
-/*
-
-
- */
 func addInfoOrError(freqInf *[]FrequencyInfo,freqErr *[]ArchInfoError,
 	fi chan FrequencyInfo,fe chan ArchInfoError,endInfo chan bool){
 	defer doneGor("addInfoOrError")
@@ -109,24 +97,15 @@ func UnpackWithCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent)([]Fr
 	skip       := make(chan bool,5)
 	stopTimer  := make(chan bool,5)
 
-	//defer func(){
-	//	<- end
-	//	<- endInfo
-	//	<- cancel
-	//	<- skip
-	//	<- stopTimer
-	//}()
 
-	ncc := NewChanCLosers()
+	ncc := newChanCLosers()
 
 	go setTimeEverySecond(guiC,stopTimer)
 	go cancelUnpack(guiC,cancel,ncc.cancel)
 	go skipUnpack(guiC,skip,ncc.skip)
 	go addInfoOrError(&freqInf,&freqErr,fichan,fechan,endInfo)
 	go wrapperUnpackCtx(path,ext,beautyName,guiC,fichan,fechan,end)
-	//TODO
-	// - доделать для остальных архивов
-	// - возможно стоит добавить временную директорию
+
 
 	wg.Add(5)
 	defer func() {
@@ -138,12 +117,6 @@ func UnpackWithCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent)([]Fr
 		skip <- false
 		stopTimer <- false
 
-
-
-		//err := os.RemoveAll(filepath.Join(filepath.Dir(path), "temp_Path"))
-		//if err != nil {
-		//	log.Println("DEFER",err)
-		//}
 	}()
 	select {
 		case <-cancel:
@@ -214,8 +187,6 @@ func unpackCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent,
 
 	tempPath,err := tempDeleter.CreateTempDir("")
 	guiC.AddTempDir <- tempPath
-
-	//tempPath := filepath.Join(filepath.Dir(path), "temp_Path")
 
 	defer func() {
 		guiC.DeleteTempDir <-tempPath

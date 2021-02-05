@@ -33,7 +33,7 @@ func StartDelete(guiC *appStruct.GuiComponent ){
 		case <-guiC.EndDeleteTemp:
 
 			tempDirs = setAllTrue(tempDirs)
-			log.Println("EndDeleteTemp ::: ", tempDirs)
+			//log.Println("EndDeleteTemp ::: ", tempDirs)
 			scanningEnd = true
 		case <-time.After(2000*time.Millisecond):
 
@@ -43,7 +43,7 @@ func StartDelete(guiC *appStruct.GuiComponent ){
 				tempDirs = removeAllDirs(tempDirs)
 
 				if len(tempDirs) == 0 {
-					log.Println("Delete folder complete")
+					//log.Println("Delete folder complete")
 					return
 				}
 			}

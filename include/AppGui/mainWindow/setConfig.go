@@ -18,21 +18,21 @@ func setConfig(gc *appStruct.GuiComponent){
 	Нужно засунуть в отдельную функцию
 	*/
 	if cfg.StartDir == ""{
-		gc.StartDirectoryForScan.SetText("Директория для сканирования не задана")
-		gc.StartDirectoryForScan.AdjustSize()
+		gc.StartDirectoryForScan.UpdateTextFromGoroutine("Директория для сканирования не задана")
+		gc.StartDirectoryForScan.AdjustSizeFromGoroutine()
 		return
 	}
 	res,_ := exists(cfg.StartDir)
 	if  res == false {
 		// sudo chmod -R 600 testRoot/ например в таком случае
-		gc.StartDirectoryForScan.SetText("Директории "+cfg.StartDir +" не существует или к ней невозможен доступ")
-		gc.StartDirectoryForScan.AdjustSize()
+		gc.StartDirectoryForScan.UpdateTextFromGoroutine("Директории "+cfg.StartDir +" не существует или к ней невозможен доступ")
+		gc.StartDirectoryForScan.AdjustSizeFromGoroutine()
 		return
 	}
 
-	gc.StartDirectoryForScan.SetText(directoryForScanning+": "+cfg.StartDir)
+	gc.StartDirectoryForScan.UpdateTextFromGoroutine(directoryForScanning+": "+cfg.StartDir)
 
-	gc.StartDirectoryForScan.AdjustSize()
+	gc.StartDirectoryForScan.AdjustSizeFromGoroutine()
 }
 
 //проверка на существование папки или доступа к ней

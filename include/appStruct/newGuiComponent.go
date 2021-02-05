@@ -17,16 +17,15 @@ type GuiComponent struct{
 	MainWindow             *widgets.QMainWindow
 	MainWidget             *widgets.QWidget
 
-	FileProgress           *widgets.QProgressBar
+	FileProgress           *CustomProgressBar
 	FileProgressUpdate     chan int
 
-	InfoAboutScanningFiles *widgets.QLabel
-	InfoAboutScanningFilesUpdate chan string
+	InfoAboutScanningFiles *CustomLabel
 
-	StartDirectoryForScan  *widgets.QLabel
 
-	ScanningTimeInfo       *widgets.QLabel
-	ScanningTimeInfoUpdate chan string
+	StartDirectoryForScan  *CustomLabel
+
+	ScanningTimeInfo       *CustomLabel
 
 	FileTree               *widgets.QTreeWidget
 	FileTreeUpdate          chan TreeItemsPair
@@ -56,10 +55,8 @@ func NewGui()*GuiComponent{
 		FileProgress:                 nil,
 		FileProgressUpdate:           make(chan int, 1000),
 		InfoAboutScanningFiles:       nil,
-		InfoAboutScanningFilesUpdate: make(chan string, 1000),
 		StartDirectoryForScan:        nil,
 		ScanningTimeInfo:             nil,
-		ScanningTimeInfoUpdate:       make(chan string, 1000),
 		FileTree:                     nil,
 		FileTreeUpdate:               make(chan TreeItemsPair, 1000),
 		ErrorTable:                   nil,

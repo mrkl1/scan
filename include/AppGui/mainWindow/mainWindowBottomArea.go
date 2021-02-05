@@ -27,10 +27,10 @@ func newBottomArea(guiC *appStruct.GuiComponent)*widgets.QHBoxLayout{
 
 func controlButtonsArea(guiC *appStruct.GuiComponent)*widgets.QVBoxLayout{
 	controlLayout := widgets.NewQVBoxLayout()
-	btnChooseDir  := widgets.NewQPushButton2(btnChooseDirName,nil)
-	btnStart      := widgets.NewQPushButton2(btnStartName,nil)
-	btnStop       := widgets.NewQPushButton2(btnStopName,nil)
-	btnSkip       := widgets.NewQPushButton2(btnSkipName,nil)
+	btnChooseDir  := appStruct.NewCustomButton2(btnChooseDirName,nil)
+	btnStart      := appStruct.NewCustomButton2(btnStartName,nil)
+	btnStop       := appStruct.NewCustomButton2(btnStopName,nil)
+	btnSkip       := appStruct.NewCustomButton2(btnSkipName,nil)
 	controlLayout.Layout().AddWidget(btnChooseDir)
 	controlLayout.Layout().AddWidget(btnSkip)
 	controlLayout.Layout().AddWidget(btnStart)
@@ -58,8 +58,10 @@ func controlButtonsArea(guiC *appStruct.GuiComponent)*widgets.QVBoxLayout{
 		if filePath == "" {
 			return
 		}
-		guiC.StartDirectoryForScan.SetText(directoryForScanning+": "+filePath)
-		guiC.InfoAboutScanningFiles.SetText("")
+
+		guiC.StartDirectoryForScan.UpdateTextFromGoroutine(directoryForScanning+": "+filePath)
+		guiC.StartDirectoryForScan.AdjustSizeFromGoroutine()
+		guiC.InfoAboutScanningFiles.UpdateTextFromGoroutine("")
 		guiC.StartDirectoryName = filePath
 		cfg := config.GetCurrentConfig()
 		cfg.StartCoordinate =[]int{
@@ -80,12 +82,12 @@ func controlButtonsArea(guiC *appStruct.GuiComponent)*widgets.QVBoxLayout{
 		guiC.SearchIsActive = false
 		btnStop.SetEnabled(false)
 		go func (){
-			guiC.InfoAboutScanningFiles.SetText("Подождите идет завершение процесса сканирования")
+			guiC.InfoAboutScanningFiles.UpdateTextFromGoroutine("Подождите идет завершение процесса сканирования")
 			for {
 				time.Sleep(time.Millisecond*350)
-				guiC.InfoAboutScanningFiles.SetText(updateStopInfo(guiC.InfoAboutScanningFiles))
+				guiC.InfoAboutScanningFiles.UpdateTextFromGoroutine(updateStopInfo(guiC.InfoAboutScanningFiles))
 				if guiC.SearchIsActive{
-					guiC.InfoAboutScanningFiles.SetText("Процесс сканирования был остановлен")
+					guiC.InfoAboutScanningFiles.UpdateTextFromGoroutine("Процесс сканирования был остановлен")
 					btnStart.SetEnabled(true)
 					btnChooseDir.SetEnabled(true)
 					return
@@ -97,7 +99,7 @@ func controlButtonsArea(guiC *appStruct.GuiComponent)*widgets.QVBoxLayout{
 	return controlLayout
 }
 
-func updateStopInfo(InfoAboutScanningFiles *widgets.QLabel)string{
+func updateStopInfo(InfoAboutScanningFiles *appStruct.CustomLabel)string{
 	if strings.HasSuffix(InfoAboutScanningFiles.Text(),"..."){
 		return "Подождите идет завершение процесса сканирования."
 	}
