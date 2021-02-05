@@ -1,6 +1,7 @@
 package unarchive
 
 import (
+	"context"
 	"errors"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/mholt/archiver"
@@ -26,8 +27,6 @@ type chanCLosers struct {
 func newChanCLosers()chanCLosers{
 	return chanCLosers{
 		cancel: make(chan bool,1),
-		//stop:   make(chan bool,1),
-		//ctx:    make(chan bool,1),
 		skip:   make(chan bool,1),
 	}
 }
@@ -85,8 +84,12 @@ func addInfoOrError(freqInf *[]FrequencyInfo,freqErr *[]ArchInfoError,
 }
 
 func UnpackWithCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent)([]FrequencyInfo,[]ArchInfoError){
+
+	ctx,cancelCtx := context.WithCancel(context.Background())
+
 	var freqInf []FrequencyInfo
 	var freqErr []ArchInfoError
+
 	path       = CheckExtension(path,ext)
 	fichan     := make(chan FrequencyInfo,100)
 	fechan     := make(chan ArchInfoError,100)
@@ -104,11 +107,12 @@ func UnpackWithCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent)([]Fr
 	go cancelUnpack(guiC,cancel,ncc.cancel)
 	go skipUnpack(guiC,skip,ncc.skip)
 	go addInfoOrError(&freqInf,&freqErr,fichan,fechan,endInfo)
-	go wrapperUnpackCtx(path,ext,beautyName,guiC,fichan,fechan,end)
+	go wrapperUnpackCtx(path,ext,beautyName,guiC,fichan,fechan,end,ctx)
 
 
 	wg.Add(5)
 	defer func() {
+
 		ncc.cancel <- false
 		ncc.skip <- false
 		end <- false
@@ -116,6 +120,10 @@ func UnpackWithCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent)([]Fr
 		cancel <- false
 		skip <- false
 		stopTimer <- false
+
+		cancelCtx()
+
+
 
 	}()
 	select {
@@ -172,15 +180,15 @@ func skipUnpack(guiC *appStruct.GuiComponent,skip chan bool,timeExceed chan bool
 
 
 func wrapperUnpackCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent,
-	                  fi chan FrequencyInfo,fe chan ArchInfoError,end chan bool){
+	                  fi chan FrequencyInfo,fe chan ArchInfoError,end chan bool,ctx context.Context){
 	defer doneGor("wrapperUnpackCtx")
-	unpackCtx(path,ext,beautyName,guiC,fi,fe,end)
+	unpackCtx(path,ext,beautyName,guiC,fi,fe,end,ctx)
 
 	end <- true
 }
 
 func unpackCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent,
-	fi chan FrequencyInfo,fe chan ArchInfoError,end chan bool){
+	fi chan FrequencyInfo,fe chan ArchInfoError,end chan bool,ctx context.Context){
 
 	var err error
 	path = CheckExtension(path,ext)
@@ -196,7 +204,7 @@ func unpackCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent,
 		beautyName = path
 	}
 	if ext == ".7z" || ext == ".gz"{
-		err = unpackGZ(path,tempPath)
+		err = unpackGZ(path,tempPath,ctx)
 	} else {
 
 		err = archiver.Unarchive(path, tempPath)
@@ -225,12 +233,12 @@ func unpackCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent,
 		return
 	}
 
-	findAnotherArhcWithCtx(tempPath,ext,beautyName ,guiC, fi,fe,end)
+	findAnotherArhcWithCtx(tempPath,ext,beautyName ,guiC, fi,fe,end,ctx)
 
 }
 
 func findAnotherArhcWithCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent,
-	fi chan FrequencyInfo,fe chan ArchInfoError,end chan bool) {
+	fi chan FrequencyInfo,fe chan ArchInfoError,end chan bool,ctx context.Context) {
 	files, _ := ioutil.ReadDir(path)
 
 	for _, f := range files {
@@ -244,7 +252,7 @@ func findAnotherArhcWithCtx(path,ext,beautyName string,guiC *appStruct.GuiCompon
 			//в папке 1 лежат папки 2 и 3
 			//и beatyName будет в конце выглядеть так 1/2/3 а не 1/2 и 1/3 т.к. 2 никуда не пропадет на след цикле
 			beautyName := filepath.Join(beautyName, f.Name())
-			findAnotherArhcWithCtx(filepath.Join(path, f.Name()), ext, beautyName, guiC,fi,fe,end)
+			findAnotherArhcWithCtx(filepath.Join(path, f.Name()), ext, beautyName, guiC,fi,fe,end,ctx)
 		} else {
 			ext_m,_ := mimetype.DetectFile(filepath.Join(path,f.Name()))
 			ext = ext_m.Extension()
@@ -257,7 +265,7 @@ func findAnotherArhcWithCtx(path,ext,beautyName string,guiC *appStruct.GuiCompon
 			}
 			if isArch(ext){
 				beautyName := filepath.Join(beautyName, f.Name())
-				unpackCtx(filepath.Join(path,f.Name()),ext,beautyName,guiC,fi,fe,end)
+				unpackCtx(filepath.Join(path,f.Name()),ext,beautyName,guiC,fi,fe,end,ctx)
 				continue
 			}
 			w := textSearchAndExtract.FindText(filepath.Join(path,f.Name()),
