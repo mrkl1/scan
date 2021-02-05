@@ -1,6 +1,5 @@
-//+build windows
-
 package mainWindow
+/*
 
 import (
 	"github.com/myProj/scaner/new/include/appStruct"
@@ -25,7 +24,7 @@ var UpdateHelper = NewUpdateHelper(nil)
 при таком подходе обновление компонентов происходит в главном потоке
 если обновление компонентов производить не в главном потоке то
 можно словить SIGSEGV: и приложение закрашится
- */
+
 func runUpdater(guiC *appStruct.GuiComponent) {
 	//TODO
 	// возможно стоит сделать индикатор который показывает число просканированных
@@ -90,3 +89,5 @@ func runUpdater(guiC *appStruct.GuiComponent) {
 
 	}
 }
+
+*/
