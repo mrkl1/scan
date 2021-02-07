@@ -1,5 +1,3 @@
-//+build linux
-
 package unarchive
 
 import (
@@ -12,22 +10,6 @@ import (
 )
 
 //https://stackoverflow.com/questions/11886531/terminating-a-process-started-with-os-exec-in-golang
-
-/*
-TODO 3.01.2021 тут есть явная проблема
- основаная горутина прерывается но Run нет
- т.к. представляет собой отедельную горутину
- поэтому ее нужно завершать отдельно черещ
- cmd.Process.Kill
-
- как вариант сделать структуру на уровне пакета которая
- будет завершать все эти команды, при завершении работы
- основной функции разархивации
-
-	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
- */
-
-
 
 func unpackGZ(path,dest string, ctx context.Context)error{
 

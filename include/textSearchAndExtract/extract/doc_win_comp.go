@@ -2,6 +2,14 @@
 
 package extract
 
+import (
+	"bytes"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"syscall"
+)
+
 func DocToTxt(filePath string)string{
 	var out bytes.Buffer
 	var stderr bytes.Buffer

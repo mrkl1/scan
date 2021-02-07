@@ -6,8 +6,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/k3a/html2text"
-	"github.com/myProj/scaner/new/include/writeLog"
-	"io/ioutil"
+	"log"
 	"os/exec"
 	"path/filepath"
 	"syscall"
@@ -25,10 +24,8 @@ func Rtf2txt(docPath string)string{
 	cmd.Stderr = &stderr
 	err := cmd.Run()
 	if err != nil {
-		writeLog.WriteToLog("unrtf error:"+fmt.Sprint(err) + ": " + stderr.String())
+		log.Println("unrtf error:"+fmt.Sprint(err) + ": " + stderr.String())
 		return ""
 	}
-	ioutil.WriteFile("1.txt",[]byte("unrtf error "+fmt.Sprint(err) + ": " + stderr.String()),0666)
-
-	return  html2text.HTML2Text(out.String())
+return  html2text.HTML2Text(out.String())
 }
