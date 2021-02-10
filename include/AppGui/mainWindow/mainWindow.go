@@ -35,9 +35,7 @@ func StartUI(){
 	logggerScan.RemoveLogs()
 	guiC := NewGuiComponent() //получение основных компонентов для формы
 
-	go func(){
-		runUpdater(guiC)
-	}()
+
 	setConfig(guiC) //установка начальных графических параметров
 
 	mainLayout := widgets.NewQVBoxLayout()

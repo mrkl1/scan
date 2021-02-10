@@ -23,8 +23,8 @@ var colNames = []string{columnFileName,columnStatisticsName,columnExtensionName,
 
 
 //newFileTree дерево для отображения найденных файлов//newFileTree дерево для отображения найденных файлов//newFileTree дерево для отображения найденных файлов//newFileTree дерево для отображения найденных файлов
-func newFileTree(guiC *appStruct.GuiComponent)*widgets.QTreeWidget{
-	fileTree := widgets.NewQTreeWidget(nil)
+func newFileTree(guiC *appStruct.GuiComponent)*appStruct.CustomTreeWidget{
+	fileTree := appStruct.NewCustomTreeWidget(nil)
 	fileTree.SetColumnCount(columnCount)
 	fileTree.SetHeaderLabels(colNames)
 	fileTree.HideColumn(3)
@@ -125,13 +125,10 @@ func newFileTree(guiC *appStruct.GuiComponent)*widgets.QTreeWidget{
 
 	})
 
-
-
-
 	return fileTree
 }
 
-func resizeColumnTree(fileTree *widgets.QTreeWidget){
+func resizeColumnTree(fileTree *appStruct.CustomTreeWidget){
 	for i := 0;i < fileTree.ColumnCount();i++{
 		fileTree.ResizeColumnToContents(i)
 	}

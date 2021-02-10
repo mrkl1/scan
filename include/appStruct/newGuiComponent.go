@@ -2,13 +2,7 @@ package appStruct
 
 import "github.com/therecipe/qt/widgets"
 
-/*
-Возможно будет использоваться для того чтобы рендерить дерево
- */
-type TreeItemsPair struct {
-	Parent *widgets.QTreeWidgetItem
-	Child *widgets.QTreeWidgetItem
-}
+
 //структура хранит компоненты которые могут
 //изменятся при работе программы
 type GuiComponent struct{
@@ -27,14 +21,12 @@ type GuiComponent struct{
 
 	ScanningTimeInfo       *CustomLabel
 
-	FileTree               *widgets.QTreeWidget
-	FileTreeUpdate          chan TreeItemsPair
+	FileTree               *CustomTreeWidget
 
 	ErrorTable			   *widgets.QTableWidget
-	ErrorTableUpdate         chan string
+
 
 	NonScanTable		   *widgets.QTableWidget
-	NonScanTableUpdate     chan string
 
 	SearchIsActive         bool
 	SkipItem               bool
@@ -44,6 +36,14 @@ type GuiComponent struct{
 	AddTempDir             chan string
 	DeleteTempDir          chan string
 	EndDeleteTemp          chan bool
+
+	UpdateTime             string
+	UpdateLabel            string
+	ProgressBarValue       int
+
+
+	EndUIUpdate              chan string
+	ErrorTableUpdate         chan string
 }
 
 func NewGui()*GuiComponent{
@@ -58,11 +58,10 @@ func NewGui()*GuiComponent{
 		StartDirectoryForScan:        nil,
 		ScanningTimeInfo:             nil,
 		FileTree:                     nil,
-		FileTreeUpdate:               make(chan TreeItemsPair, 1000),
 		ErrorTable:                   nil,
 		ErrorTableUpdate:             make(chan string, 1000),
 		NonScanTable:                 nil,
-		NonScanTableUpdate:           make(chan string, 1000),
+		EndUIUpdate:                  make(chan string, 2),
 		SearchIsActive:               false,
 		SkipItem:                     false,
 		StartDirectoryName:           "",

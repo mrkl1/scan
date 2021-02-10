@@ -2,7 +2,6 @@ package mainWindow
 
 import (
 	"errors"
-	"fmt"
 	"github.com/myProj/scaner/new/include/unarchive"
 	"github.com/therecipe/qt/widgets"
 )
@@ -37,8 +36,6 @@ func RemoveAllRows(table *widgets.QTableWidget){
 		table.RemoveRow(1)
 	}
 	if table.RowCount() > 0 {
-		fmt.Println(table.RowCount())
-		fmt.Println(table.Item(0,1).Text())
 		table.RemoveRow(table.RowCount()-1)
 	}
 

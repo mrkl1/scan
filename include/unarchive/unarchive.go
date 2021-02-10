@@ -139,7 +139,6 @@ func UnpackWithCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent)([]Fr
 }
 
 func cancelUnpack(guiC *appStruct.GuiComponent,cancel chan bool,timeExceed chan bool ){
-	defer doneGor("cancelUnpack")
 	for {
 		time.Sleep(time.Millisecond*50)
 		if guiC.SearchIsActive == false{
@@ -269,7 +268,7 @@ func findAnotherArhcWithCtx(path,ext,beautyName string,guiC *appStruct.GuiCompon
 				continue
 			}
 			w := textSearchAndExtract.FindText(filepath.Join(path,f.Name()),
-				ext,newWordsConfig.GetDictWords())
+				ext,newWordsConfig.GetDictWords(),guiC)
 			fi <- FrequencyInfo{filepath.Join(beautyName, f.Name()),w,ext}
 		}
 	}

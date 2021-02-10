@@ -22,6 +22,15 @@ var (
 )
 
 func SaveReport(guiC *appStruct.GuiComponent){
+
+	var fileDialog = widgets.NewQFileDialog2(nil,"Save as...",
+		"","")
+	fileDialog.SetMimeTypeFilters([]string{"*.xlsx",})
+	newPAth := fileDialog.GetSaveFileName(nil,"Save as...",
+		"","Files (*.xlsx)","",0)
+
+
+
 	f := excelize.NewFile()
 
 	// Создаем три основных листа под отчет
@@ -39,11 +48,7 @@ func SaveReport(guiC *appStruct.GuiComponent){
 	createFindFileList(f,guiC)
 	createErrorList(f,guiC)
 	createMediaList(f,guiC)
-	var fileDialog = widgets.NewQFileDialog2(nil,"Save as...",
-		"","")
-	fileDialog.SetMimeTypeFilters([]string{"*.xlsx",})
-	newPAth := fileDialog.GetSaveFileName(nil,"Save as...",
-		"","Files (*.xlsx)","",0)
+
 	f.SaveAs(newPAth)
 }
 

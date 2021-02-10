@@ -1,7 +1,11 @@
 package search
 
-import "github.com/myProj/scaner/new/include/textSearchAndExtract/extract"
+import (
+	"github.com/myProj/scaner/new/include/textSearchAndExtract/extract"
+)
 
-func Txt(path string,words []string)  map[string]int {
-	return extract.GetTxtWordFrequency(path,words)
+func Txt(path string,words []string,st chan map[string]int) {
+	stat := extract.GetTxtWordFrequency(path,words)
+
+	st<-stat
 }

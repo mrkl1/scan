@@ -16,6 +16,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -35,30 +36,33 @@ func renderFileTree(guiC *appStruct.GuiComponent,btnStart ,btnChooseDir ,btnStop
 		btnChooseDir.SetEnabledFromGoroutine(true)
 	}()
 
-	defer func() { guiC.SearchIsActive = true
-
+	defer func() {
+		guiC.EndUIUpdate   <- ""
+		guiC.SearchIsActive = true
 		guiC.EndDeleteTemp <- true
 	}()
 
 
 	startDir := guiC.StartDirectoryName
 	guiC.FileTree.Clear()
-	//RemoveAllRows(guiC.NonScanTable)
-	//RemoveAllRows(guiC.ErrorTable)
+	RemoveAllRows(guiC.NonScanTable)
+	RemoveAllRows(guiC.ErrorTable)
 
 	files, err := ioutil.ReadDir(guiC.StartDirectoryName)
 	if err != nil {
 		guiC.InfoAboutScanningFiles.UpdateTextFromGoroutine("Невозможно сканировать данную директорию, по причине ее отсутствия или невозможности доступа к ней")
-		guiC.NonScanTableUpdate <- ""
 		return
 	}
 
 	fileCount := computeFilesCount(startDir, guiC)
 	guiC.FileProgress.SetMinimum(0)
 	guiC.FileProgress.SetMaximum(fileCount)
-	count := 0
-	guiC.FileProgress.ValueChangedFromGoroutine(count)
+	println(fileCount)
+	guiC.ProgressBarValue = 0
 
+	guiC.FileProgress.ValueChangedFromGoroutine(guiC.ProgressBarValue)
+
+	go GUIUpdater(guiC)
 
 	for _, file := range files {
 		if !guiC.SearchIsActive {
@@ -66,32 +70,45 @@ func renderFileTree(guiC *appStruct.GuiComponent,btnStart ,btnChooseDir ,btnStop
 		}
 
 		if file.IsDir() {
-			scanDirTree(guiC,&count,file)
+			scanDirTree(guiC,file)
 		} else {
-			scanFileTree(guiC,&count,file)
+			scanFileTree(guiC,file)
 		}
 
 	}
-	guiC.FileProgressUpdate <- count
 
 	guiC.InfoAboutScanningFiles.UpdateTextFromGoroutine("Сканирование завершено")
 
 }
 
-func scanDirTree(guiC *appStruct.GuiComponent,count *int,file os.FileInfo){
+func scanDirTree(guiC *appStruct.GuiComponent,file os.FileInfo){
 	//стартовая директория для поиска
 	startFilePath := filepath.Join(guiC.StartDirectoryName, file.Name())
 	var head *widgets.QTreeWidgetItem
 	err := filepath.Walk(startFilePath,
 		func(path string, info os.FileInfo, err error) error {
+
+			defer func(){
+				guiC.ProgressBarValue++
+			}()
+
 			if !guiC.SearchIsActive {
 				return errors.New("break cycle")
+			}
+
+			if info == nil {
+				return nil
+			}
+
+			if info.IsDir(){
+				return nil
 			}
 
 			ext := detectFileExtension(path)
 			guiC.InfoAboutScanningFiles.UpdateTextFromGoroutine("Сканируется "+path)
 
-			if ext == "" && !info.IsDir(){
+
+			if ext == "" {
 
 				addErrorsToTable(guiC.ErrorTable,
 					unarchive.ArchInfoError{
@@ -99,6 +116,8 @@ func scanDirTree(guiC *appStruct.GuiComponent,count *int,file os.FileInfo){
 						OpenError:   errors.New("Неизвестное расширение"),
 
 					},ext)
+
+				return nil
 			}
 
 			if searchFilter.IsExtensionForSearch(ext) {
@@ -114,30 +133,35 @@ func scanDirTree(guiC *appStruct.GuiComponent,count *int,file os.FileInfo){
 							OpenError:   errors.New("Расширение не поддерживается"),
 
 						},ext)
+					return nil
 				}
 
-				if searchFilter.IsArchive(ext){
-					path = unarchive.CheckExtension(path,ext)
-					statArches,errs := unarchive.UnpackWithCtx(path,ext,"",guiC)
+				if searchFilter.IsArchive(ext) {
+					path = unarchive.CheckExtension(path, ext)
+					statArches, errs := unarchive.UnpackWithCtx(path, ext, "", guiC)
 					if errs != nil {
-						for _,er:= range errs{
-							addErrorsToTable(guiC.ErrorTable,er,ext)
+						for _, er := range errs {
+							addErrorsToTable(guiC.ErrorTable, er, ext)
 						}
 					}
-					for _,archFile := range statArches {
-						stat,containsWord := checkResultFor(archFile.WordFrequency)
-						if containsWord {
-							if head == nil {
-								head = addParent(guiC.FileTree,file,startFilePath)
+
+					if statArches != nil {
+
+						for _, archFile := range statArches {
+							stat, containsWord := checkResultFor(archFile.WordFrequency)
+							if containsWord {
+								if head == nil {
+									head = addParent(guiC.FileTree, file, startFilePath)
+								}
+								rel, _ := filepath.Rel(startFilePath, archFile.Name)
+								addChild2(head, newChildNode(stat, rel, archFile.Ext))
+
 							}
-							rel,_ := filepath.Rel(startFilePath,archFile.Name)
-							addChild2(head,newChildNode(stat,rel ,archFile.Ext))
-
 						}
-					}
-				}// конец if проверяющим архивы
+					} // конец if проверяющим архивы
+				}
 
-				w := textSearchAndExtract.FindText(path,ext,newWordsConfig.GetDictWords())
+				w := textSearchAndExtract.FindText(path,ext,newWordsConfig.GetDictWords(),guiC)
 
 				stat,containsWord := checkResultFor(w)
 				if containsWord {
@@ -148,8 +172,11 @@ func scanDirTree(guiC *appStruct.GuiComponent,count *int,file os.FileInfo){
 					addChild2(head,newChildNode(stat,relPath,ext))
 				}
 			}// конец if проверяющего файлы с подходящим расширением
-			*count++
-			guiC.FileProgress.ValueChangedFromGoroutine(*count)
+
+
+
+
+
 			return nil
 		})
 
@@ -158,13 +185,15 @@ func scanDirTree(guiC *appStruct.GuiComponent,count *int,file os.FileInfo){
 	}
 }
 
-func scanFileTree(guiC *appStruct.GuiComponent,count *int,file os.FileInfo){
+func scanFileTree(guiC *appStruct.GuiComponent,file os.FileInfo){
 	startFilePath := filepath.Join(guiC.StartDirectoryName, file.Name())
 	var head *widgets.QTreeWidgetItem
 	ext := detectFileExtension(startFilePath)
 	guiC.InfoAboutScanningFiles.UpdateTextFromGoroutine( "Сканируется "+startFilePath+" ")
 
-
+	defer func(){
+		guiC.ProgressBarValue++
+	}()
 
 	if ext == "" {
 		addErrorsToTable(guiC.ErrorTable,
@@ -172,6 +201,7 @@ func scanFileTree(guiC *appStruct.GuiComponent,count *int,file os.FileInfo){
 				ArchiveName: startFilePath,
 				OpenError:   errors.New("Неизвестное расширение"),
 			}, ext)
+		return
 	}
 
 	if searchFilter.IsExtensionForSearch(ext) {
@@ -187,6 +217,7 @@ func scanFileTree(guiC *appStruct.GuiComponent,count *int,file os.FileInfo){
 					OpenError:   errors.New("Расширение не поддерживается"),
 
 				},ext)
+			return
 		}
 
 		if searchFilter.IsArchive(ext) {
@@ -198,6 +229,7 @@ func scanFileTree(guiC *appStruct.GuiComponent,count *int,file os.FileInfo){
 				}
 			}
 
+			if statArches != nil {
 			for _,archFile := range statArches {
 				stat,containsWord := checkResultFor(archFile.WordFrequency)
 
@@ -211,10 +243,11 @@ func scanFileTree(guiC *appStruct.GuiComponent,count *int,file os.FileInfo){
 
 				}
 			}
-
+		}
 
 		}//isArchive end
-		w := textSearchAndExtract.FindText(startFilePath,ext,newWordsConfig.GetDictWords())
+
+		w := textSearchAndExtract.FindText(startFilePath,ext,newWordsConfig.GetDictWords(),guiC)
 		stat,containsWord := checkResultFor(w)
 		if containsWord {
 			head = addParent(guiC.FileTree,file,startFilePath)
@@ -223,8 +256,8 @@ func scanFileTree(guiC *appStruct.GuiComponent,count *int,file os.FileInfo){
 			head.SetBackground(0,g)
 		}
 	}
-	*count++
-	guiC.FileProgress.ValueChangedFromGoroutine(*count)
+
+
 
 }
 
@@ -261,7 +294,7 @@ func computeFilesCount(startDir string,guiC *appStruct.GuiComponent)int  {
 
 	go func(){
 		for {
-			time.Sleep(10*time.Millisecond)
+			time.Sleep(50*time.Millisecond)
 			if !guiC.SearchIsActive {
 				stopGorun <- true
 				wg.Done()
@@ -280,7 +313,30 @@ func computeFilesCount(startDir string,guiC *appStruct.GuiComponent)int  {
 		}
 	}()
 
-	filepath.Walk(startDir,
+
+	//https://stackoverflow.com/questions/31888955/check-whether-a-file-is-a-hard-link
+	// True if the file is a symlink.
+	//https://www.socketloop.com/tutorials/golang-create-and-resolve-read-symbolic-links
+	fi,err := os.Lstat(startDir)
+	var newPath string
+
+	if fi.Mode()&os.ModeSymlink != 0 {
+		newPath, err = os.Readlink(startDir)
+		//выдается путь вида dir/... а не /dir/...
+		//из-за чего путь неправильно распознается
+		if runtime.GOOS == "linux" {
+			newPath = string(filepath.Separator)+newPath
+		}
+		newPath,err  = filepath.Abs(newPath)
+
+
+	} else {
+		newPath = startDir
+	}
+
+ 		fmt.Println("new path",err,startDir,newPath)
+
+	filepath.Walk(newPath,
 		func(path string, info os.FileInfo, err error) error {
 			count++
 			if err != nil {
@@ -301,7 +357,7 @@ func detectFileExtension(path string)string{
 
 	//время по истчении которого будет сделан вывод о том, что
 	//невозможно определить расширение файла
-	timer := time.NewTimer(2 * time.Second)
+	timer := time.NewTimer(1 * time.Second)
 	var result = ""
 	res := make(chan string)
 	go detecting(path,res)
@@ -327,6 +383,13 @@ func detecting(path string,res chan string){
 
 	mime, _ := mimetype.DetectFile(path)
 	res <- mime.Extension()
+
+	 select {
+	   case <- res: {
+
+	   }
+	}
+
 }
 
 func addNonScanItem(table *widgets.QTableWidget,path,ext string){
@@ -367,14 +430,14 @@ func setTreeWidgetItemText(item *widgets.QTreeWidgetItem,columnName,text string)
 
 //в конфиге нужно определить
 //кол-во колонок
-func addParent(tw *widgets.QTreeWidget ,file os.FileInfo,dirPath string)(*widgets.QTreeWidgetItem){
+func addParent(tw *appStruct.CustomTreeWidget ,file os.FileInfo,dirPath string)(*widgets.QTreeWidgetItem){
 	tv1 := widgets.NewQTreeWidgetItem3(nil,0)
 
 	setTreeWidgetItemText(tv1,columnFileName,filepath.Base(dirPath))
 	if !file.IsDir(){
 		setTreeWidgetItemText(tv1,columnExtensionName,detectFileExtension(dirPath))
 	}
-	tw.AddTopLevelItem(tv1)
+	tw.AddTopLevelItemFromGoroutine(tv1)
 	return tv1
 }
 

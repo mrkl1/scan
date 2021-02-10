@@ -8,44 +8,52 @@ import (
 	"github.com/myProj/scaner/new/include/textSearchAndExtract/extract/xls"
 )
 
-func Docx(path string,words []string)map[string]int{
+func Docx(path string,words []string,st chan map[string]int){
 	text,_ := docx.RetrieveAllText(path)
-	return extract.GetStringWordFrequency(text,words)
+	stat := extract.GetStringWordFrequency(text,words)
+	st <- stat
 }
 
-func Xlsx(path string,words []string)map[string]int{
+func Xlsx(path string,words []string,st chan map[string]int){
 	text := extract.RetriveTextFromXLSX(path)
-	return extract.GetStringWordFrequency(text,words)
+	stat :=  extract.GetStringWordFrequency(text,words)
+	st <- stat
 }
 
-func Vsdx(path string,words []string)map[string]int{
+func Vsdx(path string,words []string,st chan map[string]int){
 	vsdxDoc,_ := vsdx.ReadVSDXText(path)
 	text := vsdxDoc.ExtractText()
-	return extract.GetStringWordFrequency(text,words)
+	stat := extract.GetStringWordFrequency(text,words)
+	st <- stat
 }
 
-func Pptx(path string,words []string)map[string]int{
+func Pptx(path string,words []string,st chan map[string]int){
 	pptxDoc,_ := pptx.ReadPPTXText(path)
 	text := pptxDoc.ExtractText()
-	return extract.GetStringWordFrequency(text,words)
+	stat := extract.GetStringWordFrequency(text,words)
+	st <- stat
 }
 
-func Xls(path string,words []string)map[string]int{
+func Xls(path string,words []string,st chan map[string]int){
 	text := xls.RetrieveTextFromXLS(path)
-	return extract.GetStringWordFrequency(text,words)
+	stat := extract.GetStringWordFrequency(text,words)
+	st <- stat
 }
 
-func Doc(path string,words []string)map[string]int{
+func Doc(path string,words []string,st chan map[string]int){
 	text := extract.DocToTxt(path)
-	return extract.GetStringWordFrequency(text,words)
+	stat :=  extract.GetStringWordFrequency(text,words)
+	st <- stat
 }
 
-func Rtf(path string,words []string)map[string]int{
+func Rtf(path string,words []string,st chan map[string]int){
 	text := extract.Rtf2txt(path)
-	return extract.GetStringWordFrequency(text,words)
+	stat :=  extract.GetStringWordFrequency(text,words)
+	st <- stat
 }
 
-func Pdf(path string,words []string)map[string]int{
+func Pdf(path string,words []string,st chan map[string]int){
 	text := extract.ExtractTextFromPdf(path)
-	return extract.GetStringWordFrequency(text,words)
+	stat := extract.GetStringWordFrequency(text,words)
+	st <- stat
 }
