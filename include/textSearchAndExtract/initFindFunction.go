@@ -3,6 +3,7 @@ package textSearchAndExtract
 
 
 import (
+	"fmt"
 	"github.com/myProj/scaner/new/include/appStruct"
 	"github.com/myProj/scaner/new/include/textSearchAndExtract/search"
 	"time"
@@ -14,8 +15,8 @@ func skip(guiC *appStruct.GuiComponent,skip chan bool,end chan bool){
 
 	for {
 		time.Sleep(time.Millisecond*50)
-		if guiC.SkipItem == true || guiC.SearchIsActive == false{
-			guiC.SkipItem = false
+		if guiC.SkipItemNonArch == true || guiC.SearchIsActive == false{
+			guiC.SkipItemNonArch = false
 			skip <- false
 			return
 		}
@@ -38,11 +39,16 @@ func FindText(path,ext string,words []string,guiC *appStruct.GuiComponent)map[st
 
 	skipC       := make(chan bool,5)
 	end       := make(chan bool,5)
+	endTime       := make(chan bool,5)
 
 	go skip(guiC,skipC,end)
+	go setTimeEverySecond(guiC,endTime)
 
 	finder,ok := m[ext]
-
+	defer func(){
+		endTime <- true
+		end <- true
+	}()
 	if ok{
 
 		stat := make(chan map[string]int,0)
@@ -50,9 +56,9 @@ func FindText(path,ext string,words []string,guiC *appStruct.GuiComponent)map[st
 
 		select {
 		case st := <- stat:
-			end <- true
 			return st
 		case <-skipC:
+
 			return make( map[string]int,0)
 		}
 	}
@@ -85,10 +91,6 @@ func init(){
 		m[".pl"] = search.Txt
 		m[".lua"] = search.Txt
 		m[".tcl"] = search.Txt
-
-
-
-
 	//office old
 	m[".xls"] = search.Xls
 	m[".doc"]  = search.Doc
@@ -104,3 +106,27 @@ func init(){
 
 
 }
+
+
+func setTimeEverySecond(guiC *appStruct.GuiComponent,st chan bool) {
+	t := time.Time{}
+
+	for {
+
+		select {
+		case <-st:
+			guiC.ScanningTimeInfo.UpdateTextFromGoroutine("")
+			guiC.ScanningTimeInfo.AdjustSizeFromGoroutine()
+			return
+
+		case <-time.After(1*time.Second):
+
+			t = t.Add(1000 * time.Millisecond)
+			timeStr := fmt.Sprintf("Время сканирования файла: %02d:%02d:%02d", t.Hour(), t.Minute(), t.Second())
+			guiC.ScanningTimeInfo.UpdateTextFromGoroutine(timeStr)
+			guiC.ScanningTimeInfo.AdjustSizeFromGoroutine()
+
+		}
+	}
+}
+

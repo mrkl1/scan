@@ -51,6 +51,7 @@ func controlButtonsArea(guiC *appStruct.GuiComponent)*widgets.QVBoxLayout{
 
 	btnSkip.ConnectClicked(func(checked bool){
 		guiC.SkipItem = true
+		guiC.SkipItemNonArch = true
 	})
 
 	btnChooseDir.ConnectClicked(func(checked bool){

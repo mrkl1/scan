@@ -11,12 +11,8 @@ import (
 	"github.com/myProj/scaner/new/include/textSearchAndExtract"
 	"io/ioutil"
 	"path/filepath"
-	"sync"
-
 	"time"
 )
-
-var wg sync.WaitGroup
 
 
 type chanCLosers struct {
@@ -32,7 +28,7 @@ func newChanCLosers()chanCLosers{
 }
 
 func doneGor(fName string){
-	wg.Done()
+
 }
 
 
@@ -110,7 +106,7 @@ func UnpackWithCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent)([]Fr
 	go wrapperUnpackCtx(path,ext,beautyName,guiC,fichan,fechan,end,ctx)
 
 
-	wg.Add(5)
+
 	defer func() {
 
 		ncc.cancel <- false
@@ -163,6 +159,7 @@ func skipUnpack(guiC *appStruct.GuiComponent,skip chan bool,timeExceed chan bool
 	for {
 		time.Sleep(time.Millisecond*50)
 		if guiC.SkipItem == true{
+			guiC.SkipItemNonArch = false
 			guiC.SkipItem = false
 			skip <- false
 			return

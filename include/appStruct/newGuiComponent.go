@@ -30,6 +30,7 @@ type GuiComponent struct{
 
 	SearchIsActive         bool
 	SkipItem               bool
+	SkipItemNonArch               bool
 	StartDirectoryName     string
 
 
