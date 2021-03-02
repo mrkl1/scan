@@ -21,7 +21,6 @@ func unpackGZ(path,dest string, ctx context.Context)error{
 
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
-	cmds = cmd
 	err := cmd.Run()
 
 	if err != nil && err.Error() != "signal: killed" {
