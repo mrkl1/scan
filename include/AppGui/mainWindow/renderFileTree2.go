@@ -6,6 +6,7 @@ import (
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/myProj/scaner/new/include/appStruct"
 	"github.com/myProj/scaner/new/include/config/newWordsConfig"
+	"github.com/myProj/scaner/new/include/config/settings"
 	"github.com/myProj/scaner/new/include/detectOldOfficeExtension"
 	"github.com/myProj/scaner/new/include/logggerScan"
 	"github.com/myProj/scaner/new/include/searchFilter"
@@ -45,9 +46,9 @@ func renderFileTree(guiC *appStruct.GuiComponent,btnStart ,btnChooseDir ,btnStop
 
 	startDir := guiC.StartDirectoryName
 	guiC.FileTree.Clear()
-	RemoveAllRows(guiC.NonScanTable)
-	RemoveAllRows(guiC.ErrorTable)
 
+	RemoveAllRows(guiC.ErrorTable)
+	RemoveAllRows(guiC.NonScanTable)
 	files, err := ioutil.ReadDir(guiC.StartDirectoryName)
 	if err != nil {
 		guiC.InfoAboutScanningFiles.UpdateTextFromGoroutine("Невозможно сканировать данную директорию, по причине ее отсутствия или невозможности доступа к ней")
@@ -508,6 +509,10 @@ func getTopLevelItem(parent *widgets.QTreeWidgetItem) *widgets.QTreeWidgetItem{
 }
 
 func addErrorsToTable(table *widgets.QTableWidget,errs unarchive.ArchInfoError,ext string){
+
+	if errs.OpenError.Error() == "Неизвестное расширение" && !settings.IsNeedToShowError(){
+		return
+	}
 
 	table.SetRowCount(table.RowCount()+1)
 
