@@ -39,6 +39,7 @@ func Unpack7z(path,dest string)error {
 
 	for {
 		hdr, err := sz.Next()
+
 		if err == io.EOF {
 			break // End of archive
 		}

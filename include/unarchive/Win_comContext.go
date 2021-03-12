@@ -13,3 +13,8 @@ func getCommandContext(ctx context.Context,path,dest string)*exec.Cmd{
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	return cmd
 }
+
+//check archive Size
+func getCommandCheckSize(path string)*exec.Cmd{
+	return exec.Command(pass7zWindows,"l",path)
+}

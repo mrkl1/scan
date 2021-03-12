@@ -199,10 +199,13 @@ func unpackCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent,
 	if beautyName == ""{
 		beautyName = path
 	}
+
+
+
+
 	if ext == ".7z" || ext == ".gz"{
 		err = unpackGZ(path,tempPath,ctx)
 	} else {
-
 		err = archiver.Unarchive(path, tempPath)
 	}
 
