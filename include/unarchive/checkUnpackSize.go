@@ -4,9 +4,7 @@ import (
 	"bytes"
 	"errors"
 	mindisk "github.com/minio/minio/pkg/disk"
-	"github.com/myProj/scaner/new/include/logggerScan"
 	"log"
-	"runtime"
 	"strconv"
 	"strings"
 )
@@ -54,24 +52,11 @@ func readLastLine(s string)string{
 func IsSpaceEnough (archPath string)bool{
 	size,_ := getUnpackedSize(archPath)
 
-	partName,_ := partitionName(archPath)
-	freeSpace,_ := getFreeSpace(partName)
+
+	freeSpace,_ := getFreeSpace(archPath)
 	if  freeSpace - size < unpackLimit {
 		return false
-	} else {
-		return true
-	}
-}
-
-func partitionName(path string)(string,error){
-	if runtime.GOOS == "linux" {
-		return "/",nil
 	}
 
-	spl := strings.Split(path,"/")[0]
-	if len(spl) < 1 {
-		logggerScan.SaveToLog("Get part name error with path: "+path)
-		return "",errors.New("Get part name error")
-	}
-	return spl,nil
+	return true
 }
