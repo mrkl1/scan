@@ -200,12 +200,15 @@ func unpackCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent,
 		beautyName = path
 	}
 
-	if IsSpaceEnough(tempPath){
+	if ext == ".7z" && !IsSpaceEnough(path){
+		println("not enough space 2")
 		ae := ArchInfoError{
 			ArchiveName: beautyName,
 			OpenError:   errors.New("недостаточно места для разархивации"),
 		}
 		fe <- ae
+		//WARNING как это убрать
+		time.Sleep(1000*time.Microsecond)
 		return
 	}
 

@@ -32,6 +32,8 @@ type treeNodeParametrs struct {
 
 func renderFileTree(guiC *appStruct.GuiComponent,btnStart ,btnChooseDir ,btnStop *appStruct.CustomButton) {
 
+	logggerScan.SaveToLog("Start renderFileTree")
+
 	defer func() { btnStop.SetEnabledFromGoroutine(false)
 		btnStart.SetEnabledFromGoroutine(true)
 		btnChooseDir.SetEnabledFromGoroutine(true)
@@ -191,6 +193,8 @@ func scanFileTree(guiC *appStruct.GuiComponent,file os.FileInfo){
 	var head *widgets.QTreeWidgetItem
 	ext := detectFileExtension(startFilePath)
 	guiC.InfoAboutScanningFiles.UpdateTextFromGoroutine( "Сканируется "+startFilePath+" ")
+
+	logggerScan.SaveToLog(startFilePath+"[ext:"+ext+"]")
 
 	defer func(){
 		guiC.ProgressBarValue++

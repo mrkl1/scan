@@ -58,7 +58,6 @@ func FindText(path,ext string,words []string,guiC *appStruct.GuiComponent)map[st
 		case st := <- stat:
 			return st
 		case <-skipC:
-
 			return make( map[string]int,0)
 		}
 	}

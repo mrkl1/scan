@@ -3,6 +3,7 @@ package unarchive
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	mindisk "github.com/minio/minio/pkg/disk"
 	"log"
 	"strconv"
@@ -10,7 +11,7 @@ import (
 )
 
 //limit for the file unpack
-var unpackLimit uint64  = 500*1024*1024
+var unpackLimit uint64  = 500*1024*1024*1024
 
 func getFreeSpace(path string)(uint64,error){
 	di, err := mindisk.GetInfo(path)
@@ -50,11 +51,15 @@ func readLastLine(s string)string{
 }
 
 func IsSpaceEnough (archPath string)bool{
+	//rar size
+	//https://github.com/gen2brain/go-unarr
 	size,_ := getUnpackedSize(archPath)
 
 
 	freeSpace,_ := getFreeSpace(archPath)
-	if  freeSpace - size < unpackLimit {
+	fmt.Println(freeSpace - size,unpackLimit)
+	if  (freeSpace - size) < unpackLimit {
+		println("not enough space")
 		return false
 	}
 

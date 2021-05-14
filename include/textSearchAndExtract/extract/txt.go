@@ -152,6 +152,7 @@ func getFreq(startText string, wf map[string]int)map[string]int {
 			index := strings.Index(TextForSearch, word)
 			if index >= 0 {
 				wf[word]++
+				logggerScan.SaveToLog("word++: "+word)
 				TextForSearch = TextForSearch[index+len(word):]
 			} else {
 				end = false
@@ -175,6 +176,7 @@ func GetTxtWordFrequency(filepath string,words []string) map[string]int{
 	} else {
 		readFromSmallFile(f,&wf)
 	}
+
 
 	return wf
 }
