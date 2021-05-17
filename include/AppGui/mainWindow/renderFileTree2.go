@@ -60,7 +60,7 @@ func renderFileTree(guiC *appStruct.GuiComponent,btnStart ,btnChooseDir ,btnStop
 	fileCount := computeFilesCount(startDir, guiC)
 	guiC.FileProgress.SetMinimum(0)
 	guiC.FileProgress.SetMaximum(fileCount)
-	println(fileCount)
+
 	guiC.ProgressBarValue = 0
 
 	guiC.FileProgress.ValueChangedFromGoroutine(guiC.ProgressBarValue)
@@ -152,10 +152,12 @@ func scanDirTree(guiC *appStruct.GuiComponent,file os.FileInfo){
 
 						for _, archFile := range statArches {
 							stat, containsWord := checkResultFor(archFile.WordFrequency)
+
 							if containsWord {
 								if head == nil {
 									head = addParent(guiC.FileTree, file, startFilePath)
 								}
+
 								rel, _ := filepath.Rel(startFilePath, archFile.Name)
 								addChild2(head, newChildNode(stat, rel, archFile.Ext))
 
@@ -167,6 +169,7 @@ func scanDirTree(guiC *appStruct.GuiComponent,file os.FileInfo){
 				w := textSearchAndExtract.FindText(path,ext,newWordsConfig.GetDictWords(),guiC)
 
 				stat,containsWord := checkResultFor(w)
+
 				if containsWord {
 					if head == nil {
 						head = addParent(guiC.FileTree,file,startFilePath)
@@ -175,10 +178,6 @@ func scanDirTree(guiC *appStruct.GuiComponent,file os.FileInfo){
 					addChild2(head,newChildNode(stat,relPath,ext))
 				}
 			}// конец if проверяющего файлы с подходящим расширением
-
-
-
-
 
 			return nil
 		})
@@ -322,26 +321,24 @@ func computeFilesCount(startDir string,guiC *appStruct.GuiComponent)int  {
 	//https://stackoverflow.com/questions/31888955/check-whether-a-file-is-a-hard-link
 	// True if the file is a symlink.
 	//https://www.socketloop.com/tutorials/golang-create-and-resolve-read-symbolic-links
-	fi,err := os.Lstat(startDir)
+	fi,_ := os.Lstat(startDir)
 	var newPath string
 
 	if fi.Mode()&os.ModeSymlink != 0 {
-		newPath, err = os.Readlink(startDir)
+		newPath, _ := os.Readlink(startDir)
 		//выдается путь вида dir/... а не /dir/...
 		//из-за чего путь неправильно распознается
 		if runtime.GOOS == "linux" {
 			newPath = string(filepath.Separator)+newPath
 		}
-		newPath,err  = filepath.Abs(newPath)
+		newPath,_  = filepath.Abs(newPath)
 
 
 	} else {
 		newPath = startDir
 	}
 
- 		fmt.Println("new path",err,startDir,newPath)
-
-	filepath.Walk(newPath,
+ 		filepath.Walk(newPath,
 		func(path string, info os.FileInfo, err error) error {
 			count++
 			if err != nil {
@@ -437,12 +434,15 @@ func setTreeWidgetItemText(item *widgets.QTreeWidgetItem,columnName,text string)
 //кол-во колонок
 func addParent(tw *appStruct.CustomTreeWidget ,file os.FileInfo,dirPath string)(*widgets.QTreeWidgetItem){
 	tv1 := widgets.NewQTreeWidgetItem3(nil,0)
+	logggerScan.SaveToLog("head "+dirPath)
 
 	setTreeWidgetItemText(tv1,columnFileName,filepath.Base(dirPath))
 	if !file.IsDir(){
 		setTreeWidgetItemText(tv1,columnExtensionName,detectFileExtension(dirPath))
 	}
+
 	tw.AddTopLevelItemFromGoroutine(tv1)
+	logggerScan.SaveToLog("head Text "+tv1.Text(0))
 	return tv1
 }
 
@@ -526,7 +526,7 @@ func addErrorsToTable(table *widgets.QTableWidget,errs unarchive.ArchInfoError,e
 	newEntry = widgets.NewQTableWidgetItem2(errs.OpenError.Error(),0)
 	table.SetItem(table.RowCount()-1,1,newEntry)
 
-	newEntry = widgets.NewQTableWidgetItem2(ext,0)
+	newEntry = widgets.NewQTableWidgetItem2(errs.Ext,0)
 	table.SetItem(table.RowCount()-1,2,newEntry)
 
 }

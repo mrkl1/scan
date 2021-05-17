@@ -15,16 +15,16 @@ func skip(guiC *appStruct.GuiComponent,skip chan bool,end chan bool){
 
 	for {
 		time.Sleep(time.Millisecond*50)
-		if guiC.SkipItemNonArch == true || guiC.SearchIsActive == false{
-			guiC.SkipItemNonArch = false
-			skip <- false
-			return
-		}
+
 		select {
 		case <-end:
 			return
-		default:
-			continue
+		case <-time.After(time.Millisecond*50):
+			if guiC.SkipItemNonArch == true || guiC.SearchIsActive == false{
+				guiC.SkipItemNonArch = false
+				skip <- false
+				return
+			}
 		}
 
 	}

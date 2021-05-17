@@ -119,8 +119,6 @@ func UnpackWithCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent)([]Fr
 
 		cancelCtx()
 
-
-
 	}()
 	select {
 		case <-cancel:
@@ -136,19 +134,17 @@ func UnpackWithCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent)([]Fr
 
 func cancelUnpack(guiC *appStruct.GuiComponent,cancel chan bool,timeExceed chan bool ){
 	for {
-		time.Sleep(time.Millisecond*50)
-		if guiC.SearchIsActive == false{
-
-			cancel <- false
-
-			return
-		}
 
 		select {
 		case <-timeExceed:
 			return
-		default:
-			continue
+		case <-time.After(time.Millisecond*50):
+			if guiC.SearchIsActive == false{
+
+				cancel <- false
+
+				return
+			}
 		}
 
 	}
@@ -157,18 +153,18 @@ func cancelUnpack(guiC *appStruct.GuiComponent,cancel chan bool,timeExceed chan 
 func skipUnpack(guiC *appStruct.GuiComponent,skip chan bool,timeExceed chan bool){
 	defer doneGor("skipUnpack")
 	for {
-		time.Sleep(time.Millisecond*50)
-		if guiC.SkipItem == true{
-			guiC.SkipItemNonArch = false
-			guiC.SkipItem = false
-			skip <- false
-			return
-		}
+
+
 		select {
 		case <-timeExceed:
 			return
-		default:
-			continue
+		case <-time.After(time.Millisecond*50):
+			if guiC.SkipItem == true{
+				guiC.SkipItemNonArch = false
+				guiC.SkipItem = false
+				skip <- false
+				return
+			}
 		}
 
 	}
@@ -202,16 +198,15 @@ func unpackCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent,
 
 	if ext == ".7z" && !IsSpaceEnough(path){
 		println("not enough space 2")
-		ae := ArchInfoError{
+
+		fe <- ArchInfoError{
 			ArchiveName: beautyName,
 			OpenError:   errors.New("недостаточно места для разархивации"),
 		}
-		fe <- ae
 		//WARNING как это убрать
 		time.Sleep(1000*time.Microsecond)
 		return
 	}
-
 
 	if ext == ".7z" || ext == ".gz"{
 		err = unpackGZ(path,tempPath,ctx)
@@ -234,11 +229,10 @@ func unpackCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent,
 			return
 		}
 
-		ae := ArchInfoError{
+		fe <- ArchInfoError{
 			ArchiveName: beautyName,
 			OpenError:   err,
 		}
-		fe <- ae
 		return
 	}
 
@@ -267,8 +261,9 @@ func findAnotherArhcWithCtx(path,ext,beautyName string,guiC *appStruct.GuiCompon
 			ext = ext_m.Extension()
 			if ext == ""{
 				ae := ArchInfoError{
-					ArchiveName: beautyName,
+					ArchiveName: filepath.Join(beautyName,f.Name()),
 					OpenError:   errors.New("Неизвестное расширение"),
+					Ext: "",
 				}
 				fe <- ae
 			}
