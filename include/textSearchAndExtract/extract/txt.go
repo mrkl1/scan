@@ -1,7 +1,6 @@
 package extract
 
 import (
-	"github.com/myProj/scaner/new/include/logggerScan"
 	"golang.org/x/text/encoding/charmap"
 	"io"
 	"io/ioutil"
@@ -152,7 +151,6 @@ func getFreq(startText string, wf map[string]int)map[string]int {
 			index := strings.Index(TextForSearch, word)
 			if index >= 0 {
 				wf[word]++
-				logggerScan.SaveToLog("word++: "+word)
 				TextForSearch = TextForSearch[index+len(word):]
 			} else {
 				end = false
@@ -166,7 +164,6 @@ func GetTxtWordFrequency(filepath string,words []string) map[string]int{
 	wf := initWordFrequency(words)
 	f, err := os.Open(filepath)
 	if err != nil {
-		logggerScan.SaveToLog("GetTxtWordFrequency open file "+err.Error())
 		return nil
 	}
 	defer f.Close()

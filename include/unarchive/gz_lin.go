@@ -4,21 +4,22 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"github.com/myProj/scaner/new/include/logggerScan"
 	"log"
 	"os/exec"
 )
 
 //https://stackoverflow.com/questions/11886531/terminating-a-process-started-with-os-exec-in-golang
-
+var globCMD *exec.Cmd
 func unpackGZ(path,dest string, ctx context.Context)error{
 
 	var cmd *exec.Cmd
 	//заменить на функцию, которая компилируется в зависимости от ОС
 
-		cmd = getCommandContext(ctx,path,dest)
-
-
+	cmd = getCommandContext(ctx,path,dest)
+	globCMD = cmd
+	fmt.Println(globCMD)
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	err := cmd.Run()

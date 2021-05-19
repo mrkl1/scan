@@ -15,6 +15,7 @@ import (
 	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/widgets"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -33,7 +34,7 @@ type treeNodeParametrs struct {
 func renderFileTree(guiC *appStruct.GuiComponent,btnStart ,btnChooseDir ,btnStop *appStruct.CustomButton) {
 
 	logggerScan.SaveToLog("Start renderFileTree")
-
+	log.Println("START ")
 	defer func() { btnStop.SetEnabledFromGoroutine(false)
 		btnStart.SetEnabledFromGoroutine(true)
 		btnChooseDir.SetEnabledFromGoroutine(true)
@@ -253,7 +254,9 @@ func scanFileTree(guiC *appStruct.GuiComponent,file os.FileInfo){
 
 		w := textSearchAndExtract.FindText(startFilePath,ext,newWordsConfig.GetDictWords(),guiC)
 		stat,containsWord := checkResultFor(w)
+		fmt.Println(startFilePath,"textSearchAndExtract ",w)
 		if containsWord {
+
 			head = addParent(guiC.FileTree,file,startFilePath)
 			setTreeWidgetItemText(head,columnStatisticsName,stat)
 			g := gui.NewQBrush3(gui.NewQColor3(0xd3, 0xd3, 0xd3, 0xff), 1)

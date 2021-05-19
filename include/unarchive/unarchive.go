@@ -3,6 +3,7 @@ package unarchive
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/mholt/archiver"
 	"github.com/myProj/scaner/new/include/appStruct"
@@ -116,8 +117,17 @@ func UnpackWithCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent)([]Fr
 		cancel <- false
 		skip <- false
 		stopTimer <- false
+		fmt.Println(globCMD)
+		if globCMD != nil {
+			if globCMD.Process != nil {
+				globCMD.Process.Kill()
+				fmt.Println("Kill:",path)
+			}
+		}
 
 		cancelCtx()
+
+
 
 	}()
 	select {
