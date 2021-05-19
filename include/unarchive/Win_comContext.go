@@ -5,6 +5,7 @@ package unarchive
 import (
 	"context"
 	"os/exec"
+	"syscall"
 )
 
 func getCommandContext(ctx context.Context,path,dest string)*exec.Cmd{
