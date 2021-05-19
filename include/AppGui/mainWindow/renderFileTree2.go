@@ -235,32 +235,33 @@ func scanFileTree(guiC *appStruct.GuiComponent,file os.FileInfo){
 			}
 
 			if statArches != nil {
-			for _,archFile := range statArches {
-				stat,containsWord := checkResultFor(archFile.WordFrequency)
+				for _,archFile := range statArches {
+					stat,containsWord := checkResultFor(archFile.WordFrequency)
 
-				if containsWord {
-					if head == nil {
-						head = addParent(guiC.FileTree,file,startFilePath)
+					if containsWord {
+						if head == nil {
+							head = addParent(guiC.FileTree,file,startFilePath)
+						}
+						rel,_ := filepath.Rel(startFilePath,archFile.Name)
+						tnp := newChildNode(stat,rel,archFile.Ext)
+						addChild2(head,tnp)
+
 					}
-					rel,_ := filepath.Rel(startFilePath,archFile.Name)
-					tnp := newChildNode(stat,rel,archFile.Ext)
-					addChild2(head,tnp)
-
 				}
 			}
-		}
 
 		}//isArchive end
 
 		w := textSearchAndExtract.FindText(startFilePath,ext,newWordsConfig.GetDictWords(),guiC)
 		stat,containsWord := checkResultFor(w)
-		fmt.Println(startFilePath,"textSearchAndExtract ",w)
 		if containsWord {
 
 			head = addParent(guiC.FileTree,file,startFilePath)
 			setTreeWidgetItemText(head,columnStatisticsName,stat)
 			g := gui.NewQBrush3(gui.NewQColor3(0xd3, 0xd3, 0xd3, 0xff), 1)
 			head.SetBackground(0,g)
+
+			//head.RemoveChild(head.Child(0))
 		}
 	}
 
@@ -341,7 +342,7 @@ func computeFilesCount(startDir string,guiC *appStruct.GuiComponent)int  {
 		newPath = startDir
 	}
 
- 		filepath.Walk(newPath,
+	filepath.Walk(newPath,
 		func(path string, info os.FileInfo, err error) error {
 			count++
 			if err != nil {
@@ -389,10 +390,10 @@ func detecting(path string,res chan string){
 	mime, _ := mimetype.DetectFile(path)
 	res <- mime.Extension()
 
-	 select {
-	   case <- res: {
+	select {
+	case <- res: {
 
-	   }
+	}
 	}
 
 }
@@ -436,16 +437,13 @@ func setTreeWidgetItemText(item *widgets.QTreeWidgetItem,columnName,text string)
 //в конфиге нужно определить
 //кол-во колонок
 func addParent(tw *appStruct.CustomTreeWidget ,file os.FileInfo,dirPath string)(*widgets.QTreeWidgetItem){
-	tv1 := widgets.NewQTreeWidgetItem3(nil,0)
-	logggerScan.SaveToLog("head "+dirPath)
-
+	tv1 := widgets.NewQTreeWidgetItem3(tw,0)
 	setTreeWidgetItemText(tv1,columnFileName,filepath.Base(dirPath))
 	if !file.IsDir(){
 		setTreeWidgetItemText(tv1,columnExtensionName,detectFileExtension(dirPath))
 	}
 
 	tw.AddTopLevelItemFromGoroutine(tv1)
-	logggerScan.SaveToLog("head Text "+tv1.Text(0))
 	return tv1
 }
 

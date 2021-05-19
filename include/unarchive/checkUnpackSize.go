@@ -25,11 +25,16 @@ func getUnpackedSize(path string)(uint64,error){
 	var stderr bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
-	err := cmd.Run()
-	//в 7z в 3 столбце хранится общая инфа о размере распакованного файла
 
+	err := cmd.Run()
+
+	//в 7z в 3 столбце хранится общая инфа о размере распакованного файла
+	if len(strings.Fields(readLastLine(out.String()))) < 3 || err != nil {
+		return 0,errors.New("Не получилось определить размер файла")
+	}
 	size := strings.Fields(readLastLine(out.String()))[2]
-	s,_ := strconv.ParseUint(size,10,64)
+	fmt.Println(size)
+	s,err := strconv.ParseUint(size,10,64)
 
 	if err != nil {
 		log.Println("checkSize error :::"+stderr.String(),err)
@@ -53,11 +58,11 @@ func readLastLine(s string)string{
 func IsSpaceEnough (archPath string)bool{
 	//rar size
 	//https://github.com/gen2brain/go-unarr
+
 	size,_ := getUnpackedSize(archPath)
 
-
 	freeSpace,_ := getFreeSpace(archPath)
-	fmt.Println(freeSpace - size,unpackLimit)
+
 	if  (freeSpace - size) < unpackLimit {
 		println("not enough space")
 		return false

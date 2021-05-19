@@ -17,6 +17,8 @@ func unpackGZ(path,dest string, ctx context.Context)error{
 	var cmd *exec.Cmd
 	//заменить на функцию, которая компилируется в зависимости от ОС
 
+
+
 	cmd = getCommandContext(ctx,path,dest)
 	globCMD = cmd
 	fmt.Println(globCMD)

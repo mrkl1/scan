@@ -5,8 +5,8 @@ import (
 	"github.com/alexmullins/zip"
 	"log"
 	"os/exec"
-	"runtime"
 	"strings"
+
 )
 
 func checkForPassword(path,ext string,err error)bool{
@@ -50,11 +50,8 @@ func checkRar(path string,err error)bool{
 func check7z(path string)bool{
 	//
 	var cmd *exec.Cmd
-	if runtime.GOOS == "windows"{
-		cmd = exec.Command(pass7zWindows,"t",path,"-p")
-	} else if runtime.GOOS == "linux" {
-		cmd = exec.Command(pass7zLinux,"t",path,"-p")
-	}
+
+	cmd = getCommandPassword(path)
 
 	//var out bytes.Buffer
 	var stderr bytes.Buffer

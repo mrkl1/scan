@@ -72,17 +72,15 @@ func addInfoOrError(freqInf *[]FrequencyInfo,freqErr *[]ArchInfoError,
 			*freqInf = append(*freqInf,newFi)
 		case newFe := <-fe:
 			*freqErr = append(*freqErr,newFe)
-		case <- endInfo:   {
+		case <- endInfo:
 			return
-		}
-
 		}
 	}
 }
 
 func UnpackWithCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent)([]FrequencyInfo,[]ArchInfoError){
 
-	ctx,cancelCtx := context.WithCancel(context.Background())
+	ctx,_ := context.WithCancel(context.Background())
 
 	var freqInf []FrequencyInfo
 	var freqErr []ArchInfoError
@@ -117,27 +115,28 @@ func UnpackWithCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent)([]Fr
 		cancel <- false
 		skip <- false
 		stopTimer <- false
-		fmt.Println(globCMD)
 		if globCMD != nil {
 			if globCMD.Process != nil {
 				globCMD.Process.Kill()
-				fmt.Println("Kill:",path)
 			}
 		}
 
-		cancelCtx()
+		//cancelCtx()
 
 
 
 	}()
 	select {
-		case <-cancel:
-			return freqInf,freqErr
-		case <-skip:
-
-			return freqInf,freqErr
-		case <- end :
-			return freqInf,freqErr
+	case <-cancel:
+		return freqInf,freqErr
+	case <-skip:
+		return freqInf,freqErr
+	case <- end :
+		time.Sleep(1*time.Millisecond)
+		fmt.Println(path)
+		fmt.Println("inf",freqInf)
+		fmt.Println("err",freqErr)
+		return freqInf,freqErr
 	}
 
 }
@@ -182,7 +181,7 @@ func skipUnpack(guiC *appStruct.GuiComponent,skip chan bool,timeExceed chan bool
 
 
 func wrapperUnpackCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent,
-	                  fi chan FrequencyInfo,fe chan ArchInfoError,end chan bool,ctx context.Context){
+	fi chan FrequencyInfo,fe chan ArchInfoError,end chan bool,ctx context.Context){
 	defer doneGor("wrapperUnpackCtx")
 	unpackCtx(path,ext,beautyName,guiC,fi,fe,end,ctx)
 
@@ -195,6 +194,7 @@ func unpackCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent,
 	var err error
 	path = CheckExtension(path,ext)
 
+
 	tempPath,err := tempDeleter.CreateTempDir("")
 	guiC.AddTempDir <- tempPath
 
@@ -206,19 +206,26 @@ func unpackCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent,
 		beautyName = path
 	}
 
-	if ext == ".7z" && !IsSpaceEnough(path){
-		println("not enough space 2")
-
-		fe <- ArchInfoError{
-			ArchiveName: beautyName,
-			OpenError:   errors.New("недостаточно места для разархивации"),
-		}
-		//WARNING как это убрать
-		time.Sleep(1000*time.Microsecond)
-		return
-	}
+	//if ext == ".7z" && !IsSpaceEnough(path){
+	//	fe <- ArchInfoError{
+	//		ArchiveName: beautyName,
+	//		OpenError:   errors.New("недостаточно места для разархивации"),
+	//	}
+	//	//WARNING как это убрать
+	//	time.Sleep(1000*time.Microsecond)
+	//	return
+	//}
 
 	if ext == ".7z" || ext == ".gz"{
+		if check7z(path){
+
+			fe <- ArchInfoError{
+				ArchiveName: beautyName,
+				OpenError:   errors.New("на файле пароль"),
+			}
+			//time.Sleep(1*time.Millisecond)
+			return
+		}
 		err = unpackGZ(path,tempPath,ctx)
 	} else {
 		err = archiver.Unarchive(path, tempPath)

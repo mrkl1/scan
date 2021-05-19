@@ -13,5 +13,9 @@ func getCommandContext(ctx context.Context,path,dest string)*exec.Cmd{
 
 //check archive Size
 func getCommandCheckSize(path string)*exec.Cmd{
-	return exec.Command(pass7zLinux,"l",path)
+	return exec.Command(pass7zLinux,"l",path,"-p")
+}
+
+func getCommandPassword(path string)*exec.Cmd{
+	return exec.Command(pass7zLinux,"t",path,"-p")
 }
