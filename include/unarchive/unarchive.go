@@ -3,7 +3,6 @@ package unarchive
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/mholt/archiver"
 	"github.com/myProj/scaner/new/include/appStruct"
@@ -117,14 +116,11 @@ func UnpackWithCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent)([]Fr
 		stopTimer <- false
 		if globCMD != nil {
 			if globCMD.Process != nil {
-				globCMD.Process.Kill()
+				globCMD.Process.Release()
+				//globCMD.Process.Kill()
 			}
 		}
-
 		//cancelCtx()
-
-
-
 	}()
 	select {
 	case <-cancel:
@@ -133,9 +129,6 @@ func UnpackWithCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent)([]Fr
 		return freqInf,freqErr
 	case <- end :
 		time.Sleep(1*time.Millisecond)
-		fmt.Println(path)
-		fmt.Println("inf",freqInf)
-		fmt.Println("err",freqErr)
 		return freqInf,freqErr
 	}
 
@@ -206,15 +199,13 @@ func unpackCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent,
 		beautyName = path
 	}
 
-	//if ext == ".7z" && !IsSpaceEnough(path){
-	//	fe <- ArchInfoError{
-	//		ArchiveName: beautyName,
-	//		OpenError:   errors.New("недостаточно места для разархивации"),
-	//	}
-	//	//WARNING как это убрать
-	//	time.Sleep(1000*time.Microsecond)
-	//	return
-	//}
+	if ext == ".7z" && !IsSpaceEnough(path){
+		fe <- ArchInfoError{
+			ArchiveName: beautyName,
+			OpenError:   errors.New("недостаточно места для разархивации"),
+		}
+		return
+	}
 
 	if ext == ".7z" || ext == ".gz"{
 		if check7z(path){
