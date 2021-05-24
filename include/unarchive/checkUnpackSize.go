@@ -3,7 +3,6 @@ package unarchive
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	mindisk "github.com/minio/minio/pkg/disk"
 	"log"
 	"strconv"
@@ -33,7 +32,6 @@ func getUnpackedSize(path string)(uint64,error){
 		return 0,errors.New("Не получилось определить размер файла")
 	}
 	size := strings.Fields(readLastLine(out.String()))[2]
-	fmt.Println(size)
 	s,err := strconv.ParseUint(size,10,64)
 
 	if err != nil {
@@ -55,18 +53,21 @@ func readLastLine(s string)string{
 	return s[li2+1:li1]
 }
 
-func IsSpaceEnough (archPath string)bool{
+func IsSpaceEnough (archPath string)(bool,error){
 	//rar size
 	//https://github.com/gen2brain/go-unarr
 
-	size,_ := getUnpackedSize(archPath)
+	size,err := getUnpackedSize(archPath)
 
+	if err != nil {
+		return false, err
+	}
 	freeSpace,_ := getFreeSpace(archPath)
 
 	if  (freeSpace - size) < unpackLimit {
-		println("not enough space")
-		return false
+
+		return false,errors.New("недостаточно места для разархивации")
 	}
 
-	return true
+	return true,nil
 }

@@ -199,10 +199,12 @@ func unpackCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent,
 		beautyName = path
 	}
 
-	if ext == ".7z" && !IsSpaceEnough(path){
+	ok,err := IsSpaceEnough(path)
+
+	if  !ok && err.Error() =="недостаточно места для разархивации" {
 		fe <- ArchInfoError{
 			ArchiveName: beautyName,
-			OpenError:   errors.New("недостаточно места для разархивации"),
+			OpenError:   err,
 		}
 		return
 	}
@@ -228,6 +230,7 @@ func unpackCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent,
 
 	if err != nil {
 
+
 		if checkForPassword(path,ext,err){
 			//end <- true
 			fe <- ArchInfoError{
@@ -239,7 +242,7 @@ func unpackCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent,
 
 		fe <- ArchInfoError{
 			ArchiveName: beautyName,
-			OpenError:   err,
+			OpenError:   errors.New("На архиве пароль или он поврежден "),
 		}
 		return
 	}

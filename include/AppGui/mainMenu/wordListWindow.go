@@ -5,6 +5,8 @@ import (
 	"github.com/myProj/scaner/new/include/config/newWordsConfig"
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
+	"runtime"
+	"strings"
 )
 
 const (
@@ -77,34 +79,70 @@ func setAddWordWindow(wordList *widgets.QListWidget)*widgets.QWidget{
 	addWordWindow.SetWindowTitle(addWordWindowName)
 	addWordWindow.SetMaximumWidth(addWordWindowMaxWidth)
 	//пользовательский ввод
-	userInput := widgets.NewQLineEdit(nil)
+	userInput := widgets.NewQTextEdit(nil)
 	//кнопка для добавления слова в конфиг
 	addBtn := widgets.NewQPushButton2(addWordWindowAddBtnName,nil)
 	//область отображает было ли слово успешно добавлено в словарь или нет
-	lblResult := widgets.NewQLabel2("", nil, 0)
+	lblResultError := widgets.NewQLabel2("", nil, 0)
+	lblResultSuccess := widgets.NewQLabel2("", nil, 0)
+
+	lblResultError.SetStyleSheet("QLabel {color : red; }")
+	lblResultSuccess.SetStyleSheet("QLabel {color : green; }")
+
 	lblInputName := widgets.NewQLabel2(addWordWindowInputName,nil,0)
 	lblInputName.SetFixedHeight(15)
 	//добавление компонентов на форму
 	vBoxLayout.Layout().AddWidget(lblInputName)
 	vBoxLayout.Layout().AddWidget(userInput)
 	vBoxLayout.Layout().AddWidget(addBtn)
-	vBoxLayout.Layout().AddWidget(lblResult)
+	vBoxLayout.Layout().AddWidget(lblResultError)
+	vBoxLayout.Layout().AddWidget(lblResultSuccess)
 	//событие для добавления слова
 	addBtn.ConnectClicked(func(bool){
-		if userInput.Text() == ""{
-			lblResult.SetText("Слово должно содержать\n хотя бы один символ")
+
+
+		if userInput.ToPlainText() == ""{
+			lblResultError.SetText("Слово должно содержать\n хотя бы один символ")
 			return
 		}
 
-		err := addToWordList(userInput.Text(),wordList)
-		if err != nil {
-			lblResult.SetText("Такое слово уже есть")
-			return
+		fields := strings.Split(userInput.ToPlainText(),getLineBreakSeparator())
+
+		lblResultError.SetText("")
+		lblResultSuccess.SetText("")
+		errorResultText := ""
+		successResultText := ""
+
+
+		for _,w := range fields {
+			if w == ""{
+				continue
+			}
+			err := addToWordList(w,wordList)
+			if err != nil {
+				errorResultText += "Cлово \""+w+ "\" уже есть.\n"
+			} else {
+				successResultText += "Слово \""+w+"\" успешно добавлено.\n"
+			}
+
+			if errorResultText != ""   {
+				lblResultError.SetText(errorResultText)
+			}
+
 		}
-		lblResult.SetText("Слово "+userInput.Text()+".\nУспешно добавлено")
+
+		lblResultSuccess.SetText(successResultText)
 		userInput.Clear()
 
 	})
 
 	return addWordWindow
 }
+
+func getLineBreakSeparator()string{
+	if runtime.GOOS == "windows" {
+		return "\r\n"
+	}
+	return "\n"
+}
+
