@@ -6,7 +6,6 @@ import (
 	"github.com/myProj/scaner/new/include/appStruct"
 	"github.com/myProj/scaner/new/include/config/extensions"
 	"github.com/myProj/scaner/new/include/config/newWordsConfig"
-	"github.com/myProj/scaner/new/include/config/settings"
 	"github.com/myProj/scaner/new/include/config/words"
 	"github.com/myProj/scaner/new/include/logggerScan"
 	"github.com/myProj/scaner/new/include/reportScan"
@@ -78,24 +77,19 @@ func NewBar(component *appStruct.GuiComponent)*widgets.QMenuBar{
 
 		ecxludeWindow.ConnectCloseEvent(func(event *gui.QCloseEvent){
 			var exts []extensions.Extension
-			var sets []settings.Settings
+			//var sets []settings.Settings
 			for _,c := range checkBoxes.ExtcheckBoxes {
 				exts = append(exts,extensions.Extension{
 					Ext:          c.Text(),
 					AllowScanning: c.IsChecked(),
 				})
-			}
 
-			for _,c := range checkBoxes.SetcheckBoxes {
-				sets = append(sets,settings.Settings{
-					Setting:          c.Text(),
-					IsAllowSetting: c.IsChecked(),
-				})
+
 			}
 
 
 			err := extensions.SetExtStatus(exts)
-			settings.SetNewConfig(sets)
+
 
 			if err != nil {
 				logggerScan.SaveToLog("SetExtStatus error:"+err.Error())

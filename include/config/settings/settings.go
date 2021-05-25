@@ -11,10 +11,15 @@ import (
 
 var settingsFileName = filepath.Join("config","settings.json")
 
+
+
 type Settings struct {
 	Setting        string `json:"setting"`
 	IsAllowSetting bool   `json:"isAllowSetting"`
+	Limit          int    `json:"limit"`
 }
+
+
 
 func ReadSettingsFromConfig()[]Settings{
 	settingsFile,err := os.OpenFile(settingsFileName,os.O_RDWR | os.O_APPEND,0644)
@@ -37,7 +42,8 @@ func ReadSettingsFromConfig()[]Settings{
 }
 
 func SetNewConfig(s []Settings){
-	newJson, err := json.MarshalIndent(s, "", "  ")
+	newJson, err := json.MarshalIndent(&s, "", "  ")
+	fmt.Println(string(newJson))
 	if err != nil {
 		log.Println("Transformation error default file", err)
 	}
@@ -57,4 +63,31 @@ func IsNeedToShowError()bool{
 	}
 	return true
 }
+
+func SetArchiveLimit(limit int){
+	sets := ReadSettingsFromConfig()
+	log.Println("sets",	sets)
+	for i := 0;i  < len(sets); i++ {
+		if sets[i].Setting == "Ограничение на минимальное свободное место при распаковке архивов в ГБ" {
+			log.Println("sets[i]",	sets[i])
+			sets[i].Limit = limit
+		}
+	}
+	log.Println("sets",	sets)
+	SetNewConfig(sets)
+	return
+}
+
+func GetArchiveLimit()int{
+	sets := ReadSettingsFromConfig()
+
+	for _,s := range sets {
+		if s.Setting == "Ограничение на минимальное свободное место при распаковке архивов в ГБ"{
+			return s.Limit
+		}
+	}
+	return 	1
+}
+
+
 

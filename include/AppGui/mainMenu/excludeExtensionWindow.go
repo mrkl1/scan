@@ -1,10 +1,10 @@
 package mainMenu
 
 import (
-
 	"github.com/myProj/scaner/new/include/config/extensions"
 	"github.com/myProj/scaner/new/include/config/settings"
 	"github.com/therecipe/qt/core"
+	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/widgets"
 )
 
@@ -20,7 +20,7 @@ func NewExtensionTab()(*widgets.QWidget,*TabCheckBoxSettings){
 	exclWidget.SetWindowFlags(core.Qt__Dialog)
 	infoTab := widgets.NewQTabWidget(nil)
 	eT,checkBoxesExt := extensionTab()
-	sT,checkBoxesSet := settingsTab()
+	sT,checkBoxesSet := settingsTab(exclWidget)
 	infoTab.AddTab(eT, "Список расширений")
 	infoTab.AddTab(sT, "Дополнительные настройки")
 	vbox.Layout().AddWidget(infoTab)
@@ -67,20 +67,24 @@ func getNewPosition(row,column,limit int)(int,int){
 	return row+1, 0
 }
 
-func settingsTab()(*widgets.QWidget,[]*widgets.QCheckBox){
+func settingsTab(exclWidget *widgets.QWidget)(*widgets.QWidget,[]*widgets.QCheckBox){
 	settingsList := widgets.NewQWidget(nil,1)
-	vbox    := widgets.NewQGridLayout(nil)
+	vbox    := widgets.NewQVBoxLayout()
 	//
 	settingsList.SetLayout(vbox)
 
 	sets := settings.ReadSettingsFromConfig()
-
+	spinLimit := limitArchSetting()
+	vbox.AddWidget(spinLimit,0,0)
 
 	var checkBoxes []*widgets.QCheckBox
-	var i,j int
+
 	//m := newSetMap()
 	for _,set := range sets {
 
+		if set.Setting == "Ограничение на минимальное свободное место при распаковке архивов в ГБ"{
+			continue
+		}
 		chbx := widgets.NewQCheckBox2(set.Setting,nil)
 		chbx.SetChecked(false)
 		if set.IsAllowSetting {
@@ -89,11 +93,35 @@ func settingsTab()(*widgets.QWidget,[]*widgets.QCheckBox){
 
 		checkBoxes = append(checkBoxes,chbx)
 
-		vbox.AddWidget2(chbx,i,j,0)
-		i,j = getNewPosition(i,j,3)
+		vbox.AddWidget(chbx,0,0)
+		//i,j = getNewPosition(i,j,3)
 	}
 
+	exclWidget.ConnectCloseEvent(func(event *gui.QCloseEvent) {
+		settings.SetArchiveLimit(spinLimit.Value())
+		sets := settings.ReadSettingsFromConfig()
+		for i,c := range checkBoxes {
+
+			if c.Text() == "Отображать файлы в таблице с неизвестным расширением"{
+				sets[i].IsAllowSetting = c.IsChecked()
+			}
+		}
+
+		settings.SetNewConfig(sets)
+
+	})
+
+
 	return settingsList,checkBoxes
+}
+
+func limitArchSetting() *widgets.QSpinBox{
+	spinBox := widgets.NewQSpinBox(nil)
+	spinBox.SetWindowTitle("Ограничение на минимальное свободное место при распаковке архивов в ГБ")
+	spinBox.SetMinimum(0)
+	spinBox.SetMaximum(1000)
+	spinBox.SetValue(settings.GetArchiveLimit())
+	return spinBox
 }
 
 

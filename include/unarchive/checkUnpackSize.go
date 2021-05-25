@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"errors"
 	mindisk "github.com/minio/minio/pkg/disk"
+	"github.com/myProj/scaner/new/include/config/settings"
 	"log"
 	"strconv"
 	"strings"
 )
 
 //limit for the file unpack
-var unpackLimit uint64  = 500*1024*1024
+var unpackLimit uint64  = uint64(settings.GetArchiveLimit())*1024*1024*1024
 
 func getFreeSpace(path string)(uint64,error){
 	di, err := mindisk.GetInfo(path)
