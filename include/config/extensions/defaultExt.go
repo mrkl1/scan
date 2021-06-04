@@ -49,6 +49,9 @@ func checkCorrectConfig(configExt []Extension)[]Extension{
 func GetAllowList()[]Extension{
 	rec,_ := readExtConfig()
 	rec = checkCorrectConfig(rec)
+
+	sort.Sort(EXTensions(rec))
+
 	return rec
 }
 

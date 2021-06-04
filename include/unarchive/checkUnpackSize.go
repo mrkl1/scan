@@ -11,7 +11,7 @@ import (
 )
 
 //limit for the file unpack
-var unpackLimit uint64  = uint64(settings.GetArchiveLimit())*1024*1024*1024
+var unpackLimit  = uint64(settings.GetArchiveLimit())*1024*1024*1024
 
 func getFreeSpace(path string)(uint64,error){
 	di, err := mindisk.GetInfo(path)

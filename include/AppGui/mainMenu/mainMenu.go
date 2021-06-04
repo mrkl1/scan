@@ -87,9 +87,7 @@ func NewBar(component *appStruct.GuiComponent)*widgets.QMenuBar{
 
 			}
 
-
 			err := extensions.SetExtStatus(exts)
-
 
 			if err != nil {
 				logggerScan.SaveToLog("SetExtStatus error:"+err.Error())

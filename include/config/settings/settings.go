@@ -43,7 +43,7 @@ func ReadSettingsFromConfig()[]Settings{
 
 func SetNewConfig(s []Settings){
 	newJson, err := json.MarshalIndent(&s, "", "  ")
-	fmt.Println(string(newJson))
+
 	if err != nil {
 		log.Println("Transformation error default file", err)
 	}

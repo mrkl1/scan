@@ -41,6 +41,7 @@ func extensionTab()(*widgets.QWidget,[]*widgets.QCheckBox){
 	exts := extensions.GetAllowList()
 
 
+
 	var checkBoxes []*widgets.QCheckBox
 	var i,j int
 	for _,ext := range exts {
@@ -50,7 +51,6 @@ func extensionTab()(*widgets.QWidget,[]*widgets.QCheckBox){
 		if ext.AllowScanning {
 			chbx.SetChecked(true)
 		}
-
 		checkBoxes = append(checkBoxes,chbx)
 
 		vbox.AddWidget2(chbx,i,j,0)
@@ -68,14 +68,24 @@ func getNewPosition(row,column,limit int)(int,int){
 }
 
 func settingsTab(exclWidget *widgets.QWidget)(*widgets.QWidget,[]*widgets.QCheckBox){
-	settingsList := widgets.NewQWidget(nil,1)
+	settingsList := widgets.NewQWidget(nil,0)
 	vbox    := widgets.NewQVBoxLayout()
-	//
-	settingsList.SetLayout(vbox)
+	//vbox.SetContentsMargins(0,0,0,0)
+	//vbox.SetSpacing(0)
 
+	//vbox.SetAlignment2(vbox,core.Qt__AlignTop)
+	settingsList.SetLayout(vbox)
 	sets := settings.ReadSettingsFromConfig()
 	spinLimit := limitArchSetting()
+	spinName := widgets.NewQLabel2("Ограничение на минимальное свободное место при распаковке архивов в ГБ",spinLimit,0)
+
+
+
+	vbox.AddWidget(spinName,0,0)
 	vbox.AddWidget(spinLimit,0,0)
+
+
+
 
 	var checkBoxes []*widgets.QCheckBox
 
@@ -104,6 +114,7 @@ func settingsTab(exclWidget *widgets.QWidget)(*widgets.QWidget,[]*widgets.QCheck
 
 			if c.Text() == "Отображать файлы в таблице с неизвестным расширением"{
 				sets[i].IsAllowSetting = c.IsChecked()
+
 			}
 		}
 
@@ -111,13 +122,13 @@ func settingsTab(exclWidget *widgets.QWidget)(*widgets.QWidget,[]*widgets.QCheck
 
 	})
 
+	vbox.AddStretch(0)
 
 	return settingsList,checkBoxes
 }
 
 func limitArchSetting() *widgets.QSpinBox{
 	spinBox := widgets.NewQSpinBox(nil)
-	spinBox.SetWindowTitle("Ограничение на минимальное свободное место при распаковке архивов в ГБ")
 	spinBox.SetMinimum(0)
 	spinBox.SetMaximum(1000)
 	spinBox.SetValue(settings.GetArchiveLimit())

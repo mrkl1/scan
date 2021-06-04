@@ -10,7 +10,7 @@ func IsExtensionForSearch(extension string)bool{
 	ae := extensions.GetAllowList()
 
 	for _,ext := range ae{
-		if ext.Ext == extension{
+		if ext.AllowScanning && ext.Ext == extension{
 			return true
 		}
 	}
