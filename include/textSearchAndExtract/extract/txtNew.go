@@ -1,6 +1,7 @@
 package extract
 
 import (
+	"fmt"
 	"github.com/aglyzov/charmap"
 	"github.com/softlandia/cpd"
 	"io"
@@ -190,6 +191,7 @@ func getFreq(startText string, wf map[string]int)map[string]int {
 
 func GetTxtWordFrequency(filepath string,words []string) map[string]int{
 	wf := initWordFrequency(words)
+	fmt.Println(filepath)
 	codePage,_ := cpd.FileCodepageDetect(filepath)
 	f, err := os.Open(filepath)
 
