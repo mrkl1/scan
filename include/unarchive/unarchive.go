@@ -11,6 +11,7 @@ import (
 	"github.com/myProj/scaner/new/include/textSearchAndExtract"
 	"io/ioutil"
 	"path/filepath"
+	"sync"
 	"time"
 )
 
@@ -27,9 +28,7 @@ func newChanCLosers()chanCLosers{
 	}
 }
 
-func doneGor(fName string){
 
-}
 
 
 type FrequencyInfo struct {
@@ -63,7 +62,7 @@ func isArch(ext string)bool{
 
 func addInfoOrError(freqInf *[]FrequencyInfo,freqErr *[]ArchInfoError,
 	fi chan FrequencyInfo,fe chan ArchInfoError,endInfo chan bool){
-	defer doneGor("addInfoOrError")
+
 	for {
 
 		select {
@@ -78,7 +77,6 @@ func addInfoOrError(freqInf *[]FrequencyInfo,freqErr *[]ArchInfoError,
 }
 
 func UnpackWithCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent)([]FrequencyInfo,[]ArchInfoError){
-
 	ctx,_ := context.WithCancel(context.Background())
 
 	var freqInf []FrequencyInfo
@@ -97,7 +95,15 @@ func UnpackWithCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent)([]Fr
 
 	ncc := newChanCLosers()
 
-	go setTimeEverySecond(guiC,stopTimer)
+	if !guiC.IsTimeUpdate{
+
+		var mu sync.Mutex
+		mu.Lock()
+		guiC.IsTimeUpdate = true
+		mu.Unlock()
+		go setTimeEverySecond(guiC,stopTimer)
+	}
+
 	go cancelUnpack(guiC,cancel,ncc.cancel)
 	go skipUnpack(guiC,skip,ncc.skip)
 	go addInfoOrError(&freqInf,&freqErr,fichan,fechan,endInfo)
@@ -153,7 +159,7 @@ func cancelUnpack(guiC *appStruct.GuiComponent,cancel chan bool,timeExceed chan 
 }
 
 func skipUnpack(guiC *appStruct.GuiComponent,skip chan bool,timeExceed chan bool){
-	defer doneGor("skipUnpack")
+
 	for {
 
 
@@ -175,7 +181,7 @@ func skipUnpack(guiC *appStruct.GuiComponent,skip chan bool,timeExceed chan bool
 
 func wrapperUnpackCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent,
 	fi chan FrequencyInfo,fe chan ArchInfoError,end chan bool,ctx context.Context){
-	defer doneGor("wrapperUnpackCtx")
+
 	unpackCtx(path,ext,beautyName,guiC,fi,fe,end,ctx)
 
 	end <- true
@@ -201,7 +207,7 @@ func unpackCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent,
 
 	ok,err := IsSpaceEnough(path)
 
-	if  !ok && err.Error() =="недостаточно места для разархивации" {
+	if  !ok && err!= nil  && err.Error() =="недостаточно места для разархивации" {
 		fe <- ArchInfoError{
 			ArchiveName: beautyName,
 			OpenError:   err,

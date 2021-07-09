@@ -3,14 +3,17 @@ package unarchive
 import (
 	"fmt"
 	"github.com/myProj/scaner/new/include/appStruct"
+	"sync"
 	"time"
 )
 
 var counter = 1
 
 func setTimeEverySecond(guiC *appStruct.GuiComponent,st chan bool) {
-	defer doneGor("setTimeEverySecond")
+
 	//set zero time
+
+
 
 	t := time.Time{}
 
@@ -18,8 +21,12 @@ func setTimeEverySecond(guiC *appStruct.GuiComponent,st chan bool) {
 
 		select {
 		case <-st:
-					guiC.ScanningTimeInfo.UpdateTextFromGoroutine("")
-					guiC.ScanningTimeInfo.AdjustSizeFromGoroutine()
+			guiC.ScanningTimeInfo.UpdateTextFromGoroutine("")
+			guiC.ScanningTimeInfo.AdjustSizeFromGoroutine()
+			var mu sync.Mutex
+			mu.Lock()
+			guiC.IsTimeUpdate = false
+			mu.Unlock()
 			return
 
 		case <-time.After(1*time.Second):

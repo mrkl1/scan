@@ -32,7 +32,7 @@ StartUI входная функция для начала работы прил�
 */
 func StartUI(){
 
-	//logggerScan.RemoveLogs()
+	logggerScan.RemoveLogs()
 	guiC := NewGuiComponent() //получение основных компонентов для формы
 
 

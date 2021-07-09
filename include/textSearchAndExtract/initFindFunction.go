@@ -1,13 +1,12 @@
 package textSearchAndExtract
 
-
-
 import (
 	"fmt"
 	"github.com/myProj/scaner/new/include/appStruct"
 	"github.com/myProj/scaner/new/include/textSearchAndExtract/search"
 	"time"
 )
+
 
 
 
@@ -32,6 +31,7 @@ func skip(guiC *appStruct.GuiComponent,skip chan bool,end chan bool){
 
 
 func FindText(path,ext string,words []string,guiC *appStruct.GuiComponent)map[string]int{
+
 	/*
 	объявляем контекст во внешней функции
 	затем отменяем
@@ -42,17 +42,21 @@ func FindText(path,ext string,words []string,guiC *appStruct.GuiComponent)map[st
 	endTime       := make(chan bool,5)
 
 	go skip(guiC,skipC,end)
-	go setTimeEverySecond(guiC,endTime)
+	if guiC.IsTimeUpdate == false {
+		go setTimeEverySecond(guiC,endTime)
+	}
 
 	finder,ok := m[ext]
 	defer func(){
 		endTime <- true
 		end <- true
 	}()
+
 	if ok{
 
 		stat := make(chan map[string]int,0)
-		go  finder(path,words,stat)
+
+		 go	finder(path,words,stat)
 
 		select {
 		case st := <- stat:

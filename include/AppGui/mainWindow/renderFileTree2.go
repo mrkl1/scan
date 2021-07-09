@@ -31,8 +31,19 @@ type treeNodeParametrs struct {
 	ext        string
 }
 
+func recovery() {
+	if r := recover(); r != nil {
+		fmt.Println("recovered:", r)
+	}
+}
+
+
+
+
 func renderFileTree(guiC *appStruct.GuiComponent,btnStart ,btnChooseDir ,btnStop *appStruct.CustomButton) {
 
+
+	////defer recovery()
 	logggerScan.SaveToLog("Start renderFileTree")
 	log.Println("START ")
 	defer func() { btnStop.SetEnabledFromGoroutine(false)
@@ -227,6 +238,7 @@ func scanFileTree(guiC *appStruct.GuiComponent,file os.FileInfo){
 
 		if searchFilter.IsArchive(ext) {
 			startFilePath = unarchive.CheckExtension(startFilePath,ext)
+
 			statArches,errs := unarchive.UnpackWithCtx(startFilePath,ext,"",guiC)
 			if errs != nil {
 				for _,er:= range errs{

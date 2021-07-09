@@ -39,6 +39,7 @@ type GuiComponent struct{
 	EndDeleteTemp          chan bool
 
 	UpdateTime             string
+	IsTimeUpdate           bool
 	UpdateLabel            string
 	ProgressBarValue       int
 
@@ -69,5 +70,6 @@ func NewGui()*GuiComponent{
 		AddTempDir:                   make(chan string, 1000),
 		DeleteTempDir:                make(chan string, 1000),
 		EndDeleteTemp:                make(chan bool, 1000),
+		IsTimeUpdate: 				  false,
 	}
 }
