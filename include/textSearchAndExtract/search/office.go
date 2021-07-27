@@ -8,6 +8,7 @@ import (
 	"github.com/myProj/scaner/new/include/textSearchAndExtract/extract/xls"
 )
 
+
 func Docx(path string,words []string,st chan map[string]int){
 	text,_ := docx.RetrieveAllText(path)
 	stat := extract.GetStringWordFrequency(text,words)
@@ -15,10 +16,15 @@ func Docx(path string,words []string,st chan map[string]int){
 }
 
 func Xlsx(path string,words []string,st chan map[string]int){
+	defer recoveryXLSX(path,words,st)
 	text := extract.RetriveTextFromXLSX(path)
 	stat :=  extract.GetStringWordFrequency(text,words)
 	st <- stat
+
 }
+
+
+
 
 func Vsdx(path string,words []string,st chan map[string]int){
 	vsdxDoc,_ := vsdx.ReadVSDXText(path)

@@ -35,7 +35,6 @@ func StartUI(){
 	logggerScan.RemoveLogs()
 	guiC := NewGuiComponent() //получение основных компонентов для формы
 
-
 	setConfig(guiC) //установка начальных графических параметров
 
 	mainLayout := widgets.NewQVBoxLayout()
@@ -66,6 +65,9 @@ func StartUI(){
 			logggerScan.SaveToLog("SaveCurrentConfig error:"+err.Error())
 		}
 	})
+
+
+
 
 	guiC.Application.Exec()
 }

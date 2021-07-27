@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/myProj/scaner/new/include/logggerScan"
+	"log"
 	"strings"
 )
 
@@ -22,12 +23,31 @@ func RetriveTextFromXLSX(filename string)string{
 
 		textRow, err := f.GetRows(f.GetSheetName(i))
 		if err != nil {
-			return text
+			log.Println(err)
 		}
 		for _, f1 := range textRow {
 
 			text += strings.Join(f1, " ")
 		}
 	}
+
+	//PrintMemUsage()
+
 	return text
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

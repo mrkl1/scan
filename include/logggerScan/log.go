@@ -14,6 +14,7 @@ func SaveToLog(logText string){
 	defer f.Close()
 	log.SetOutput(f)
 	log.Println(strings.Replace(logText,"\n","",-1))
+	log.SetOutput(os.Stdout)
 }
 
 func RemoveLogs(){
