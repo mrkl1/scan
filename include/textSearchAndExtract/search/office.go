@@ -10,6 +10,7 @@ import (
 
 
 func Docx(path string,words []string,st chan map[string]int){
+	defer recovery(st,path)
 	text,_ := docx.RetrieveAllText(path)
 	stat := extract.GetStringWordFrequency(text,words)
 	st <- stat
@@ -27,6 +28,7 @@ func Xlsx(path string,words []string,st chan map[string]int){
 
 
 func Vsdx(path string,words []string,st chan map[string]int){
+	defer recovery(st,path)
 	vsdxDoc,_ := vsdx.ReadVSDXText(path)
 	text := vsdxDoc.ExtractText()
 	stat := extract.GetStringWordFrequency(text,words)
@@ -34,6 +36,7 @@ func Vsdx(path string,words []string,st chan map[string]int){
 }
 
 func Pptx(path string,words []string,st chan map[string]int){
+	defer recovery(st,path)
 	pptxDoc,_ := pptx.ReadPPTXText(path)
 	text := pptxDoc.ExtractText()
 	stat := extract.GetStringWordFrequency(text,words)
@@ -41,24 +44,28 @@ func Pptx(path string,words []string,st chan map[string]int){
 }
 
 func Xls(path string,words []string,st chan map[string]int){
+	defer recovery(st,path)
 	text := xls.RetrieveTextFromXLS(path)
 	stat := extract.GetStringWordFrequency(text,words)
 	st <- stat
 }
 
 func Doc(path string,words []string,st chan map[string]int){
+	defer recovery(st,path)
 	text := extract.DocToTxt(path)
 	stat :=  extract.GetStringWordFrequency(text,words)
 	st <- stat
 }
 
 func Rtf(path string,words []string,st chan map[string]int){
+	defer recovery(st,path)
 	text := extract.Rtf2txt(path)
 	stat :=  extract.GetStringWordFrequency(text,words)
 	st <- stat
 }
 
 func Pdf(path string,words []string,st chan map[string]int){
+	defer recovery(st,path)
 	text := extract.ExtractTextFromPdf(path)
 	stat := extract.GetStringWordFrequency(text,words)
 	st <- stat

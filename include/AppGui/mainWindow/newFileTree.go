@@ -1,13 +1,12 @@
 package mainWindow
 
 import (
-	"fmt"
+
 	"github.com/myProj/scaner/new/include/appStruct"
 	"github.com/myProj/scaner/new/include/searchFilter"
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/widgets"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 )
@@ -24,7 +23,7 @@ var colNames = []string{columnFileName,columnStatisticsName,columnExtensionName,
 
 //newFileTree дерево для отображения найденных файлов//newFileTree дерево для отображения найденных файлов//newFileTree дерево для отображения найденных файлов//newFileTree дерево для отображения найденных файлов
 func newFileTree(guiC *appStruct.GuiComponent)*appStruct.CustomTreeWidget{
-	fileTree := appStruct.NewCustomTreeWidget(nil)
+	fileTree := appStruct.NewCustomTreeWidget(guiC.MainWindow)
 	fileTree.SetColumnCount(columnCount)
 	fileTree.SetHeaderLabels(colNames)
 	fileTree.HideColumn(3)
@@ -36,7 +35,7 @@ func newFileTree(guiC *appStruct.GuiComponent)*appStruct.CustomTreeWidget{
 	})
 
 	//cont menu
-	ContextMenu := widgets.NewQMenu(nil)
+	ContextMenu := widgets.NewQMenu(fileTree)
 	menuOpenFile := ContextMenu.AddAction("Открыть файл")
 	menuOpenDir := ContextMenu.AddAction("Открыть директорию файла")
 	menuOpenBranch := ContextMenu.AddAction("Раскрыть ветку")
@@ -79,15 +78,15 @@ func newFileTree(guiC *appStruct.GuiComponent)*appStruct.CustomTreeWidget{
 
 
 			//"nautilus","/media/us/Transcend/тестовые_данные_для _программ/dict.txt"
-			cmd := exec.Command("nautilus",archPath)
-			fmt.Println(archPath)
-			err := cmd.Run()
-			if err != nil {
-				info := core.NewQFileInfo3(path)
-				url := core.QUrl_FromLocalFile(info.AbsolutePath())
-				gui.QDesktopServices_OpenUrl(url)
-			}
-			//explorer.exe /select,"C:\Folder\subfolder\file.txt"
+			//cmd := exec.Command("nautilus",archPath)
+			//fmt.Println(archPath)
+			//err := cmd.Run()
+			//if err != nil {
+			//}
+
+			info := core.NewQFileInfo3(path)
+			url := core.QUrl_FromLocalFile(info.AbsoluteFilePath())
+			gui.QDesktopServices_OpenUrl(url)
 
 
 
@@ -97,6 +96,7 @@ func newFileTree(guiC *appStruct.GuiComponent)*appStruct.CustomTreeWidget{
 	})
 
 	menuOpenDir.ConnectTriggered(func(checked bool) {
+
 		si := fileTree.SelectedItems()
 		if si != nil && len(si)>0 && si[0].Text(0) != ""  {
 
@@ -107,12 +107,21 @@ func newFileTree(guiC *appStruct.GuiComponent)*appStruct.CustomTreeWidget{
 				copySi = copySi.Parent()
 			}
 
-			path = filepath.Clean(guiC.StartDirectoryName+path)
-
-			info := core.NewQFileInfo3(filepath.Dir(path))
+			path = filepath.Clean(filepath.Join( guiC.StartDirectoryName,path))
+			archPath := checkForArchive(path)
+			if  archPath != ""{
+				archPath,_ := filepath.Abs(archPath)
+				path = archPath
+			}
+			info := core.NewQFileInfo3(path)
 			url := core.QUrl_FromLocalFile(info.AbsolutePath())
 			gui.QDesktopServices_OpenUrl(url)
+
+
+
 		}
+
+
 
 	})
 

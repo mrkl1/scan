@@ -5,6 +5,7 @@ import (
 	"github.com/myProj/scaner/new/include/logggerScan"
 	"github.com/myProj/scaner/new/include/textSearchAndExtract/extract"
 	"github.com/tealeg/xlsx"
+	"math"
 	"runtime/debug"
 	"strings"
 	"reflect"
@@ -20,7 +21,11 @@ func recovery(st chan map[string]int,filename string) {
 		}
 
 		logggerScan.PanicSaveTrace(filename+"\n"+panicText+"Stack TRACE:\n"+string(debug.Stack()))
-		st<-nil
+		//нужен какой то флаг
+		stat :=  make(map[string]int,1)
+		stat["!PANIC!01"]= math.MaxInt32
+		fmt.Println(stat)
+		st<-stat
 	}
 }
 
@@ -49,6 +54,7 @@ func tealegXLXS(filename string,words []string,st chan map[string]int){
 		st <- nil
 		return
 	}
+	panic("TEST")
 	var text strings.Builder
 	for _, w := range wb.Sheets {
 

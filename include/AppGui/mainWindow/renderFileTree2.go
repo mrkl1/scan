@@ -16,6 +16,7 @@ import (
 	"github.com/therecipe/qt/widgets"
 	"io/ioutil"
 	"log"
+	"math"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -129,7 +130,7 @@ func scanDirTree(guiC *appStruct.GuiComponent,file os.FileInfo){
 					unarchive.ArchInfoError{
 						ArchiveName: path,
 						OpenError:   errors.New("Неизвестное расширение"),
-
+						Ext: ext,
 					},ext)
 
 				return nil
@@ -146,7 +147,7 @@ func scanDirTree(guiC *appStruct.GuiComponent,file os.FileInfo){
 						unarchive.ArchInfoError{
 							ArchiveName: path,
 							OpenError:   errors.New("Расширение не поддерживается"),
-
+							Ext: ext,
 						},ext)
 					return nil
 				}
@@ -179,6 +180,16 @@ func scanDirTree(guiC *appStruct.GuiComponent,file os.FileInfo){
 				}
 
 				w := textSearchAndExtract.FindText(path,ext,newWordsConfig.GetDictWords(),guiC)
+
+				if len(w) == 1 && w["!PANIC!01"]== math.MaxInt32{
+					addErrorsToTable(guiC.ErrorTable,
+						unarchive.ArchInfoError{
+							ArchiveName: path,
+							OpenError:   errors.New("Невозможно открыть файл"),
+							Ext: ext,
+						}, ext)
+				}
+
 
 				stat,containsWord := checkResultFor(w)
 
@@ -216,6 +227,7 @@ func scanFileTree(guiC *appStruct.GuiComponent,file os.FileInfo){
 			unarchive.ArchInfoError{
 				ArchiveName: startFilePath,
 				OpenError:   errors.New("Неизвестное расширение"),
+				Ext: ext,
 			}, ext)
 		return
 	}
@@ -231,7 +243,7 @@ func scanFileTree(guiC *appStruct.GuiComponent,file os.FileInfo){
 				unarchive.ArchInfoError{
 					ArchiveName: startFilePath,
 					OpenError:   errors.New("Расширение не поддерживается"),
-
+					Ext: ext,
 				},ext)
 			return
 		}
@@ -265,6 +277,16 @@ func scanFileTree(guiC *appStruct.GuiComponent,file os.FileInfo){
 		}//isArchive end
 
 		w := textSearchAndExtract.FindText(startFilePath,ext,newWordsConfig.GetDictWords(),guiC)
+
+		if len(w) == 1 && w["!PANIC!01"]== math.MaxInt32{
+				addErrorsToTable(guiC.ErrorTable,
+					unarchive.ArchInfoError{
+						ArchiveName: startFilePath,
+						OpenError:   errors.New("Невозможно открыть файл"),
+						Ext: ext,
+					}, ext)
+		}
+
 		stat,containsWord := checkResultFor(w)
 		if containsWord {
 
