@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/panicwrap"
 	"github.com/myProj/scaner/new/include/AppGui/mainWindow"
-	"io/ioutil"
+	"log"
 	"os"
 	"time"
 )
@@ -14,8 +14,13 @@ import (
 
 
 func panicHandler(output string){
-	ioutil.WriteFile("panic.logs",[]byte(time.Now().String()+"\n"+
-		fmt.Sprintf("App panicked:\n\n%s\n", output)),0777)
+
+	f,_ := os.OpenFile("panic.logs",os.O_APPEND|os.O_CREATE|os.O_WRONLY,0666)
+
+	log.SetOutput(f)
+	log.Println(time.Now().String()+"\n"+
+		fmt.Sprintf("App panicked:\n\n%s\n", output))
+	log.SetOutput(os.Stdout)
 	os.Exit(1)
 }
 
