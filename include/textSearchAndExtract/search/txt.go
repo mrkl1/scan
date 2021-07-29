@@ -5,6 +5,7 @@ import (
 	"github.com/myProj/scaner/new/include/logggerScan"
 	"github.com/myProj/scaner/new/include/textSearchAndExtract/extract"
 	"github.com/tealeg/xlsx"
+	"log"
 	"math"
 	"runtime/debug"
 	"strings"
@@ -50,11 +51,10 @@ func tealegXLXS(filename string,words []string,st chan map[string]int){
 	wb,err := xlsx.OpenFile(filename)
 	defer recovery(st,filename)
 	if err != nil {
-		fmt.Println(err,wb)
+		log.Println(err,wb)
 		st <- nil
 		return
 	}
-	panic("TEST")
 	var text strings.Builder
 	for _, w := range wb.Sheets {
 
@@ -77,5 +77,4 @@ func Txt(path string,words []string,st chan map[string]int) {
 	stat := extract.GetTxtWordFrequency(path,words)
 
 	st<-stat
-
 }

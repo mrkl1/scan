@@ -24,6 +24,8 @@ var colNames = []string{columnFileName,columnStatisticsName,columnExtensionName,
 //newFileTree дерево для отображения найденных файлов//newFileTree дерево для отображения найденных файлов//newFileTree дерево для отображения найденных файлов//newFileTree дерево для отображения найденных файлов
 func newFileTree(guiC *appStruct.GuiComponent)*appStruct.CustomTreeWidget{
 	fileTree := appStruct.NewCustomTreeWidget(guiC.MainWindow)
+
+
 	fileTree.SetColumnCount(columnCount)
 	fileTree.SetHeaderLabels(colNames)
 	fileTree.HideColumn(3)
@@ -39,11 +41,15 @@ func newFileTree(guiC *appStruct.GuiComponent)*appStruct.CustomTreeWidget{
 	menuOpenFile := ContextMenu.AddAction("Открыть файл")
 	menuOpenDir := ContextMenu.AddAction("Открыть директорию файла")
 	menuOpenBranch := ContextMenu.AddAction("Раскрыть ветку")
-	guiC.MainWindow.SetContextMenuPolicy(core.Qt__CustomContextMenu)
 
 
-
-	guiC.MainWindow.ConnectCustomContextMenuRequested(func(pos *core.QPoint){
+	/*
+	чтобы настроить контекстное меню для конкретного элемента
+	нужно сделать нужно поставить SetContextMenuPolicy
+	и ConnectCustomContextMenuRequested
+	 */
+	fileTree.SetContextMenuPolicy(core.Qt__CustomContextMenu)
+	fileTree.ConnectCustomContextMenuRequested(func(pos *core.QPoint){
 
 		ContextMenu.Exec2(guiC.MainWindow.MapToGlobal(pos), nil)
 
