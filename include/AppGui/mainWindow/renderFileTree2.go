@@ -94,7 +94,7 @@ func renderFileTree(guiC *appStruct.GuiComponent,btnStart ,btnChooseDir ,btnStop
 	}
 
 	guiC.InfoAboutScanningFiles.UpdateTextFromGoroutine("Сканирование завершено")
-
+	guiC.FileProgress.ValueChangedFromGoroutine(guiC.FileProgress.Maximum())
 }
 
 func scanDirTree(guiC *appStruct.GuiComponent,file os.FileInfo){

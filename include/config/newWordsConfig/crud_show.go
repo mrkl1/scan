@@ -33,7 +33,11 @@ func DeleteWord(word string)error{
 		words = append(words[:i],words[i+1:]...)
 
 
-		rewriteDictionary(words)
+		err := rewriteDictionary(words)
+		if err != nil {
+			log.Println(err)
+		}
+
 		return nil
 	}
 
@@ -125,10 +129,8 @@ func readFile(file *os.File)([]string,error){
 			break
 		}
 
-		//TODO возможно тут будет нужна обработка trim
 		if len(line)>2{
-			//убрать \r\n
-			words = append(words, line[:len(line)-2])
+			words = append(words, strings.TrimSpace(line))
 		}
 		if err != nil {
 			break
