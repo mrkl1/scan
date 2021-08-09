@@ -3,12 +3,14 @@ package mainWindow
 import (
 
 	"github.com/myProj/scaner/new/include/appStruct"
+	"github.com/myProj/scaner/new/include/logggerScan"
 	"github.com/myProj/scaner/new/include/searchFilter"
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/widgets"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
 
 const (
@@ -81,8 +83,6 @@ func newFileTree(guiC *appStruct.GuiComponent)*appStruct.CustomTreeWidget{
 			// в директории нужно использовать местные файловые менеджеры
 			// linux nautilus
 			// windows explorer
-
-
 			//"nautilus","/media/us/Transcend/тестовые_данные_для _программ/dict.txt"
 			//cmd := exec.Command("nautilus",archPath)
 			//fmt.Println(archPath)
@@ -92,8 +92,10 @@ func newFileTree(guiC *appStruct.GuiComponent)*appStruct.CustomTreeWidget{
 
 			info := core.NewQFileInfo3(path)
 			url := core.QUrl_FromLocalFile(info.AbsoluteFilePath())
-			gui.QDesktopServices_OpenUrl(url)
-
+			ok := gui.QDesktopServices_OpenUrl(url)
+			if !ok {
+				logggerScan.SaveToLog("Не получилось открыть файл/папку:"+path)
+			}
 
 
 		}
@@ -121,8 +123,10 @@ func newFileTree(guiC *appStruct.GuiComponent)*appStruct.CustomTreeWidget{
 			}
 			info := core.NewQFileInfo3(path)
 			url := core.QUrl_FromLocalFile(info.AbsolutePath())
-			gui.QDesktopServices_OpenUrl(url)
-
+			ok := gui.QDesktopServices_OpenUrl(url)
+			if !ok {
+				logggerScan.SaveToLog("Не получилось открыть файл/папку:"+path)
+			}
 
 
 		}
@@ -159,7 +163,7 @@ func expand(ptr *widgets.QTreeWidgetItem){
 
 func checkForArchive(path string)string{
 
-	spldr :=splitDir(path)
+	spldr :=splitDirForMenu(path)
 
 	for i,d := range spldr{
 		if searchFilter.IsContainArchiveExtension(d){
@@ -170,13 +174,39 @@ func checkForArchive(path string)string{
 			if runtime.GOOS == "linux" {
 				newPath = string(filepath.Separator)+newPath
 			}
+			logggerScan.SaveToLog("ARCH PATH FOR OPEN:"+newPath)
 			return newPath
 		}
 	}
 	return ""
 }
 
+func splitDirForMenu(dir string)[]string{
+	var s []string
 
+	if runtime.GOOS == "windows"{
+		winSplit := strings.Split(dir,string(filepath.Separator))
+		if len(winSplit)>0 {
+			s = append(s,winSplit[0]+`\\`)
+		}
+		for i,v := range winSplit {
+			if v == "" {
+				s = append(s[:i],s[i+1:]...)
+			}
+		}
+		return s
+	}
+
+
+
+	s = strings.Split(dir,string(filepath.Separator))
+	for i,v := range s {
+		if v == "" {
+			s = append(s[:i],s[i+1:]...)
+		}
+	}
+	return s
+}
 
 
 

@@ -11,6 +11,10 @@ func isOle(in []byte) bool {
 	return bytes.HasPrefix(in, []byte{0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1})
 }
 
+/*
+Работает гораздо лучше чем от vasilie mimetype, но все равно не идеально
+2021/08/05 16:20:10 /home/us/Загрузки/7z/test.doc[ext:.ole]
+ */
 func DetectOldOffice(filename string) string {
 
 	file, err := os.Open(filename)
