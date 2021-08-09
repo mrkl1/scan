@@ -215,6 +215,7 @@ func unpackCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent,
 		return
 	}
 
+
 	if ext == ".7z" || ext == ".gz"{
 		if check7z(path){
 
@@ -222,12 +223,17 @@ func unpackCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent,
 				ArchiveName: beautyName,
 				OpenError:   errors.New("на файле пароль"),
 			}
-			//time.Sleep(1*time.Millisecond)
+
 			return
 		}
 		err = unpackGZ(path,tempPath,ctx)
 	} else {
 		err = archiver.Unarchive(path, tempPath)
+
+		if ext == ".zip" {
+			RenameZipIncorrectName(tempPath)
+		}
+
 	}
 
 	if !guiC.SearchIsActive {
