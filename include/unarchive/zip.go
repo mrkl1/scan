@@ -17,7 +17,10 @@ const (
 	pass7zLinux = "7z"
 	pass7zWindows = "7z/7z.exe"
 )
-
+/*
+можно распаковать только архивы без пароля
+пока не используюется
+ */
 func Unpack7z(path,dest string)error {
 
 	if checkForPassword(path,".7z",nil){

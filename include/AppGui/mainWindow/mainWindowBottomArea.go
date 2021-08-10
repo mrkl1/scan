@@ -6,6 +6,7 @@ import (
 	"github.com/myProj/scaner/new/include/logggerScan"
 	"github.com/myProj/scaner/new/include/tempDeleter"
 	"github.com/therecipe/qt/widgets"
+	"io/ioutil"
 	"strings"
 	"time"
 )
@@ -37,13 +38,18 @@ func controlButtonsArea(guiC *appStruct.GuiComponent)*widgets.QVBoxLayout{
 	controlLayout.Layout().AddWidget(btnStop)
 	btnStop.SetEnabled(false)
 	btnStart.ConnectClicked(func(checked bool) {
-		//возможно сюда нужно будет поместить
-		//структуру для сохранения текущего прогресса
+
+		_,err := ioutil.ReadDir(guiC.StartDirectoryName)
+		if err != nil {
+			guiC.InfoAboutScanningFiles.UpdateTextFromGoroutine("Невозможно сканировать данную директорию, по причине ее отсутствия или невозможности доступа к ней")
+			return
+		}
+
 		guiC.SearchIsActive = true
 		btnStart.SetEnabled(false)
 		btnChooseDir.SetEnabled(false)
 		btnStop.SetEnabled(true)
-		//mb тут сделать select по остановке функции
+
 		go tempDeleter.StartDelete(guiC)
 		go renderFileTree(guiC,btnStart,btnChooseDir,btnStop)
 

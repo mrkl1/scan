@@ -1,7 +1,6 @@
 package mainWindow
 
 import (
-
 	"github.com/myProj/scaner/new/include/appStruct"
 	"github.com/myProj/scaner/new/include/logggerScan"
 	"github.com/myProj/scaner/new/include/searchFilter"
@@ -167,9 +166,8 @@ func checkForArchive(path string)string{
 
 	for i,d := range spldr{
 		if searchFilter.IsContainArchiveExtension(d){
-			spldr = spldr[:i+1]
 
-			newPath := filepath.Join(spldr[:]...)
+			newPath := filepath.Join(spldr[:i]...)
 
 			if runtime.GOOS == "linux" {
 				newPath = string(filepath.Separator)+newPath
@@ -188,24 +186,19 @@ func splitDirForMenu(dir string)[]string{
 		winSplit := strings.Split(dir,string(filepath.Separator))
 		if len(winSplit)>0 {
 			s = append(s,winSplit[0]+`\\`)
+			winSplit = winSplit[1:]
 		}
 		for i,v := range winSplit {
 			if v == "" {
 				s = append(s[:i],s[i+1:]...)
 			}
 		}
+		logggerScan.SaveToLog("splitDirForMenu(windows)"+strings.Join(s,"") )
 		return s
 	}
 
 
-
-	s = strings.Split(dir,string(filepath.Separator))
-	for i,v := range s {
-		if v == "" {
-			s = append(s[:i],s[i+1:]...)
-		}
-	}
-	return s
+	return splitDir(dir)
 }
 
 

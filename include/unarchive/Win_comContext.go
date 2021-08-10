@@ -24,7 +24,7 @@ func getCommandCheckSize(path string)*exec.Cmd{
 
 
 func getCommandPassword(path string)*exec.Cmd{
-	cmd = exec.Command(pass7zWindows,"t",path,"-p")
+	cmd := exec.Command(pass7zWindows,"t",path,"-p")
 	cmd.SysProcAttr = &syscall.SysProcAttr{CreationFlags: 0x08000000,HideWindow: true}
 	return cmd
 }

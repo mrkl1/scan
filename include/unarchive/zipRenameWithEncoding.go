@@ -1,8 +1,8 @@
 package unarchive
 
 import (
-	"fmt"
 	"github.com/aglyzov/charmap"
+	"github.com/myProj/scaner/new/include/logggerScan"
 	"github.com/softlandia/cpd"
 	"io/ioutil"
 	"os"
@@ -21,12 +21,13 @@ chcp1251/866, KOI-8R и тд
  */
 func RenameZipIncorrectName(zipPath string){
 	fi,_ := ioutil.ReadDir(zipPath)
+	logggerScan.SaveToLog("******"+zipPath)
 	for _,v := range fi {
-
 		if !utf8.ValidString(v.Name()){
-			fmt.Println("incorrect zip")
+			logggerScan.SaveToLog("incorrect zip")
 			cp := cpd.CodepageAutoDetect([]byte(v.Name()))
 			text,_ := charmap.ANY_to_UTF8( []byte(v.Name()), cp.String())
+			logggerScan.SaveToLog("****** "+string(text)+" (name)")
 			os.Rename(filepath.Join(zipPath,v.Name())  ,filepath.Join(zipPath,string(text)))
 		}
 	}
