@@ -227,13 +227,10 @@ func unpackCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent,
 			return
 		}
 		err = unpackGZ(path,tempPath,ctx)
+	} else if ext == ".zip" {
+		err = UnzipUTF8(path, tempPath)
 	} else {
 		err = archiver.Unarchive(path, tempPath)
-
-		if ext == ".zip" {
-			RenameZipIncorrectName(tempPath)
-		}
-
 	}
 
 	if !guiC.SearchIsActive {

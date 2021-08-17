@@ -1,24 +1,26 @@
 package unarchive
 
 import (
+	"archive/zip"
+	"fmt"
 	"github.com/aglyzov/charmap"
 	"github.com/myProj/scaner/new/include/logggerScan"
 	"github.com/softlandia/cpd"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"unicode/utf8"
 )
 
 /*
 WARNING
-Возможно данную функцию можно будет усовершенствовать
-при помощи перебора возможных русских кодировок,
-например так, если после автоопределения кодировки
-строка остается невалидной, то по очереди
-перебираем возможные варианты, начиная с
-chcp1251/866, KOI-8R и тд
+Эта функция работает нормально только под линухом
+в детали не вникал, но скорее всего связанно
+с тем что винда мб неправильно интерпретирует символы
+определенной кодировки.
  */
 func RenameZipIncorrectName(zipPath string){
 	fi,err := ioutil.ReadDir(zipPath)
@@ -40,3 +42,65 @@ func RenameZipIncorrectName(zipPath string){
 	}
 }
 
+//UnzipUTF8 анзипает в правильной кодировке, обычно
+func UnzipUTF8(src string, dest string) error {
+
+
+	r, err := zip.OpenReader(src)
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+
+
+
+	for _, f := range r.File {
+
+		fWriteName := f.Name
+		if !utf8.ValidString(f.Name){
+
+			cp := cpd.CodepageAutoDetect([]byte(f.Name))
+			utf8Name,_ := charmap.ANY_to_UTF8( []byte(f.Name), cp.String())
+			logggerScan.SaveToLog("incorrect zip "+string(utf8Name)+"(name)"+"enc"+cp.String())
+			fWriteName = string(utf8Name)
+		}
+
+		fpath := filepath.Join(dest, fWriteName)
+
+
+		if !strings.HasPrefix(fpath, filepath.Clean(dest)+string(os.PathSeparator)) {
+			return fmt.Errorf("%s: illegal file path", fpath)
+		}
+
+		if f.FileInfo().IsDir() {
+			// Make Folder
+			os.MkdirAll(fpath, os.ModePerm)
+			continue
+		}
+
+		if err = os.MkdirAll(filepath.Dir(fpath), os.ModePerm); err != nil {
+			return err
+		}
+
+		outFile, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+		if err != nil {
+			return err
+		}
+
+		rc, err := f.Open()
+		if err != nil {
+			return err
+		}
+
+		_, err = io.Copy(outFile, rc)
+
+		// Close the file without defer to close before next iteration of loop
+		outFile.Close()
+		rc.Close()
+
+		if err != nil {
+			return  err
+		}
+	}
+	return nil
+}
