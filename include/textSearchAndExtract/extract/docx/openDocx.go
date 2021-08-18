@@ -43,11 +43,10 @@ func RetrieveAllText(path string)(string, error){
 	reader, err := zip.OpenReader(path)
 	if err != nil {
 		log.Println("Retrieve text docx (open Reader)",err)
-	}
-	defer reader.Close()
-	if err != nil {
 		return "", err
 	}
+	defer reader.Close()
+
 	var resultText string
 	for _, f := range reader.File {
 		if  documentForRetrieve(f.Name){
