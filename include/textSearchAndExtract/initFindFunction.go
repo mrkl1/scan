@@ -42,7 +42,7 @@ func FindText(path,ext string,words []string,guiC *appStruct.GuiComponent)map[st
 	endTime       := make(chan bool,5)
 
 	go skip(guiC,skipC,end)
-	if guiC.IsTimeUpdate == false {
+	if !guiC.IsTimeUpdate {
 		go setTimeEverySecond(guiC,endTime)
 	}
 
@@ -124,10 +124,15 @@ func setTimeEverySecond(guiC *appStruct.GuiComponent,st chan bool) {
 
 		case <-time.After(1*time.Second):
 
-			t = t.Add(1000 * time.Millisecond)
-			timeStr := fmt.Sprintf("Время сканирования файла: %02d:%02d:%02d", t.Hour(), t.Minute(), t.Second())
-			guiC.ScanningTimeInfo.UpdateTextFromGoroutine(timeStr)
-			guiC.ScanningTimeInfo.AdjustSizeFromGoroutine()
+				t = t.Add(1000 * time.Millisecond)
+				timeStr := fmt.Sprintf("Время сканирования файла: %02d:%02d:%02d", t.Hour(), t.Minute(), t.Second())
+				guiC.ScanningTimeInfo.UpdateTextFromGoroutine(timeStr)
+				guiC.ScanningTimeInfo.AdjustSizeFromGoroutine()
+				if !guiC.IsTimeUpdate{
+					guiC.ScanningTimeInfo.UpdateTextFromGoroutine("")
+					guiC.ScanningTimeInfo.AdjustSizeFromGoroutine()
+					return
+				}
 
 		}
 	}

@@ -31,11 +31,22 @@ func setTimeEverySecond(guiC *appStruct.GuiComponent,st chan bool) {
 
 		case <-time.After(1*time.Second):
 
-			counter++
-			t = t.Add(1000 * time.Millisecond)
-			timeStr := fmt.Sprintf("Время сканирования файла: %02d:%02d:%02d", t.Hour(), t.Minute(), t.Second())
-			guiC.ScanningTimeInfo.UpdateTextFromGoroutine(timeStr)
-			guiC.ScanningTimeInfo.AdjustSizeFromGoroutine()
+			if guiC.IsTimeUpdate{
+
+				counter++
+				t = t.Add(1000 * time.Millisecond)
+				timeStr := fmt.Sprintf("Время сканирования файла: %02d:%02d:%02d", t.Hour(), t.Minute(), t.Second())
+				guiC.ScanningTimeInfo.UpdateTextFromGoroutine(timeStr)
+				guiC.ScanningTimeInfo.AdjustSizeFromGoroutine()
+				//в общем иногда каналы
+				//неправильно закрываются поэтому тут
+				//нужен это код
+				if !guiC.IsTimeUpdate{
+					guiC.ScanningTimeInfo.UpdateTextFromGoroutine("")
+					guiC.ScanningTimeInfo.AdjustSizeFromGoroutine()
+					return
+				}
+			}
 
 		}
 	}
