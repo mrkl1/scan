@@ -56,7 +56,7 @@ func FindText(path,ext string,words []string,guiC *appStruct.GuiComponent)map[st
 
 		stat := make(chan map[string]int,0)
 
-		 go	finder(path,words,stat)
+		go finder(path,words,stat)
 
 		select {
 		case st := <- stat:

@@ -43,7 +43,6 @@ func recovery() {
 
 func renderFileTree(guiC *appStruct.GuiComponent,btnStart ,btnChooseDir ,btnStop *appStruct.CustomButton) {
 
-
 	////defer recovery()
 	logggerScan.SaveToLog("Start renderFileTree")
 	log.Println("START ")
@@ -84,13 +83,11 @@ func renderFileTree(guiC *appStruct.GuiComponent,btnStart ,btnChooseDir ,btnStop
 		if !guiC.SearchIsActive {
 			return
 		}
-
 		if file.IsDir() {
 			scanDirTree(guiC,file)
 		} else {
 			scanFileTree(guiC,file)
 		}
-
 	}
 
 	guiC.InfoAboutScanningFiles.UpdateTextFromGoroutine("Сканирование завершено")

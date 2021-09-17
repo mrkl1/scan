@@ -112,7 +112,6 @@ func UnpackWithCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent)([]Fr
 
 
 	defer func() {
-
 		ncc.cancel <- false
 		ncc.skip <- false
 		end <- false
@@ -120,6 +119,8 @@ func UnpackWithCtx(path,ext,beautyName string,guiC *appStruct.GuiComponent)([]Fr
 		cancel <- false
 		skip <- false
 		stopTimer <- false
+
+
 		if globCMD != nil {
 			if globCMD.Process != nil {
 				globCMD.Process.Release()
